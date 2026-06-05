@@ -77,6 +77,14 @@ Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 See [LICENSE](LICENSE)
 
 ---
+Ellenwood, C. & Claude (Anthropic). (2026). Haawke Hash: 
+Cryptographic Provenance for Human-AI Collaborative Works 
+(v1.0). Haawke Neural Technology. 
+https://hash.haawke.com
+ORCID: 0009-0001-6475-5109
+SHA-256: [hash]
+
+---
 
 *Craig Ellenwood × Claude (Anthropic) · Haawke Neural Technology · 2026*  
 *ORCID: 0009-0001-6475-5109 · haawke.com*
