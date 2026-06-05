@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -924,8 +923,10 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, authors: ["Craig Elle
     return;
   }
   try {
-    const html = document.documentElement.outerHTML;
-    const data = new TextEncoder().encode(html);
+    // Fetch raw file — stable, not affected by browser/Netlify DOM injection
+    const fileResp = await fetch('./index.html?nocache=' + Date.now());
+    const fileText = await fileResp.text();
+    const data = new TextEncoder().encode(fileText);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const liveHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
     const matches = liveHash.toLowerCase() === storedHash.toLowerCase();
