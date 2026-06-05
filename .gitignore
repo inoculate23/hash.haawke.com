@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs
+*.log
+
+# Local provenance log exports (keep .ots files, ignore JSON exports)
+haawke-provenance-log-*.json
+
+# Node / Wrangler (CF worker files are separate)
+node_modules/
+.wrangler/
+wrangler.toml
+*.worker.js
+
+# Environment
+.env
+.env.local
+
+# Editor
+.vscode/
+.cursor/
+*.swp
+*.swo
