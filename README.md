@@ -4,7 +4,7 @@
 
 **Cryptographic provenance for human-AI collaborative works.**
 
-A browser-based SHA-256 hashing and blockchain timestamping tool built by Craig Ellenwood × Claude (Anthropic). Every hash is registered to a public Cloudflare KV registry and optionally timestamped to the Bitcoin blockchain via OpenTimestamps.
+A browser-based SHA-256 hashing and blockchain timestamping tool built by Craig Ellenwood assisted by Claude (Anthropic). Every hash is registered to a public Cloudflare KV registry and optionally timestamped to the Bitcoin blockchain via OpenTimestamps.
 
 Live: [hash.haawke.com](https://hash.haawke.com)  
 Registry: [verify.haawke.com](https://verify.haawke.com)  
