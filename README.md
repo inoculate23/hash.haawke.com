@@ -77,7 +77,8 @@ Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 See [LICENSE](LICENSE)
 
 ---
-Ellenwood, C. & Claude (Anthropic). (2026). Haawke Hash: 
+Citations if you find this of use, are appreciated: 
+Ellenwood, Craig. & Claude (Anthropic). (2026). Haawke Hash: 
 Cryptographic Provenance for Human-AI Collaborative Works 
 (v1.0). Haawke Neural Technology. 
 https://hash.haawke.com
