@@ -429,7 +429,186 @@
     .formats { grid-template-columns: 1fr; }
     .url-row { flex-direction: column; }
   }
+
+  /* AUTHOR FIELDS */
+  .author-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(79,168,232,0.15);
+  }
+  .author-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .author-header-label {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    transition: color 0.2s;
+  }
+  .author-header:hover .author-header-label { color: var(--blue); }
+  .author-toggle-icon {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    transition: color 0.2s;
+  }
+  .author-header:hover .author-toggle-icon { color: var(--blue); }
+  .author-fields {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 10px 12px;
+    align-items: center;
+    margin-top: 14px;
+  }
+  .author-fields input[type="text"] { width: 100%; flex: none; }
+  .author-field-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* EXIF / XMP SECTION */
+  .exif-section {
+    margin-top: 12px;
+    padding: 16px 18px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: rgba(201,168,76,0.05);
+  }
+  .exif-title {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .exif-info {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .btn-exif {
+    width: 100%;
+    border-color: rgba(201,168,76,0.6);
+    color: var(--gold);
+  }
+  .btn-exif:hover {
+    background: rgba(201,168,76,0.1);
+    box-shadow: 0 0 20px rgba(201,168,76,0.15);
+  }
+
+  /* HASH ABBREVIATED DISPLAY */
+  .hash-full {
+    font-size: 11px;
+    color: rgba(79,168,232,0.4);
+    letter-spacing: 0.04em;
+    word-break: break-all;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* CERTIFICATE SECTION */
+  .cert-section {
+    margin-top: 12px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    background: rgba(13,22,42,0.4);
+  }
+  .cert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .cert-title {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .cert-hint {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.06em;
+  }
+  .cert-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #qrPreview canvas, #qrPreview img {
+    border: 1px solid rgba(79,168,232,0.2);
+    padding: 6px;
+    background: #fff;
+  }
+
+  /* SESSION TAB */
+  .session-fields { display: flex; flex-direction: column; gap: 12px; }
+  .session-field { display: flex; flex-direction: column; gap: 6px; }
+  .session-field-row { display: flex; gap: 12px; }
+  @media (max-width: 600px) { .session-field-row { flex-direction: column; } }
+  .session-label {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); display: flex; justify-content: space-between; align-items: center;
+  }
+  .session-hint { font-size: 10px; color: var(--dim); letter-spacing: 0.06em; text-transform: none; }
+  .char-count { font-size: 10px; color: var(--dim); letter-spacing: 0.06em; text-transform: none; }
+  .char-warn { color: #e87b4f; }
+  .session-fields input[type="text"],
+  .session-fields input[type="date"],
+  .session-fields textarea { width: 100%; flex: none; }
+  .session-fields input[type="date"] { color-scheme: dark; }
+  .session-fields textarea { resize: vertical; min-height: 76px; }
+  .session-prev-hash { font-size: 11px !important; letter-spacing: 0.04em !important; }
+
+  /* CHAIN OUTPUT (shown inside result for session hashes) */
+  .chain-output {
+    margin-top: 12px; padding: 16px 18px;
+    border: 1px solid rgba(79,168,232,0.3);
+    background: rgba(13,22,42,0.4);
+  }
+  .chain-output-title {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 12px;
+  }
+
+  /* CHAIN VIEWER */
+  .chain-viewer { margin-top: 40px; }
+  .chain-entry {
+    border: 1px solid var(--border); padding: 14px 18px; margin-bottom: 6px;
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .chain-entry:hover { border-color: var(--blue); }
+  .chain-entry-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .chain-entry-title { font-size: 14px; color: var(--cream); margin-bottom: 3px; }
+  .chain-entry-hash { font-size: 11px; color: var(--blue); letter-spacing: 0.04em; }
+  .chain-entry-date { font-size: 12px; color: var(--dim); white-space: nowrap; text-align: right; }
+  .chain-entry-ots { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; text-align: right; margin-top: 3px; }
+  .ots-pending { color: rgba(201,168,76,0.6); }
+  .ots-confirmed { color: #4caf7d; }
+  .chain-entry-body {
+    display: none; margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--dim); line-height: 1.8;
+  }
+  .chain-entry-body.open { display: block; }
+  .chain-summary { margin-bottom: 8px; }
+  .chain-decisions { margin-top: 8px; }
+  .chain-decisions-title {
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 4px;
+  }
+  .chain-decision {
+    padding-left: 10px; border-left: 2px solid rgba(201,168,76,0.3); margin-bottom: 3px;
+  }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -454,6 +633,7 @@
       <button class="tab active" onclick="switchTab('file')">File</button>
       <button class="tab" onclick="switchTab('text')">Text / HTML</button>
       <button class="tab" onclick="switchTab('url')">URL</button>
+      <button class="tab" onclick="switchTab('session')">Session</button>
     </div>
 
     <!-- FILE -->
@@ -483,6 +663,83 @@
       </div>
     </div>
 
+    <!-- SESSION TAB -->
+    <div id="tab-session" style="display:none">
+      <div class="session-fields">
+        <div class="session-field">
+          <label class="session-label" for="sessionTitle">
+            Session Title <span style="color:var(--blue)">*</span>
+          </label>
+          <input type="text" id="sessionTitle"
+            placeholder="e.g. Haawke Hash launch · copyright filing · BD strategy">
+        </div>
+        <div class="session-field-row">
+          <div class="session-field">
+            <label class="session-label" for="sessionDate">
+              Date <span style="color:var(--blue)">*</span>
+            </label>
+            <input type="date" id="sessionDate">
+          </div>
+          <div class="session-field" style="flex:1">
+            <label class="session-label" for="sessionParticipants">Participants</label>
+            <input type="text" id="sessionParticipants"
+              placeholder="Craig Ellenwood × Claude (Anthropic)">
+          </div>
+        </div>
+        <div class="session-field">
+          <label class="session-label" for="sessionSummary">
+            Summary <span style="color:var(--blue)">*</span>
+            <span class="char-count" id="summaryCount">0 / 500</span>
+          </label>
+          <textarea id="sessionSummary" maxlength="500" rows="5"
+            oninput="updateCharCount()"
+            placeholder="What was accomplished, decided, or created in this session..."></textarea>
+        </div>
+        <div class="session-field">
+          <label class="session-label" for="sessionDecisions">
+            Key Decisions
+            <span class="session-hint">optional · one per line</span>
+          </label>
+          <textarea id="sessionDecisions" rows="4"
+            placeholder="Register as Literary Work not GRUW&#10;Commission-only sales reps legal in US/Canada&#10;..."></textarea>
+        </div>
+        <div class="session-field-row">
+          <div class="session-field" style="flex:1">
+            <label class="session-label" for="sessionArtifacts">
+              Artifacts <span class="session-hint">optional · filenames, one per line</span>
+            </label>
+            <textarea id="sessionArtifacts" rows="3"
+              placeholder="haawke-hash-deposit.txt&#10;rate-card.pdf"></textarea>
+          </div>
+          <div class="session-field" style="flex:1">
+            <label class="session-label" for="sessionPrevHash">
+              Previous Hash <span class="session-hint">optional · links the chain</span>
+            </label>
+            <input type="text" id="sessionPrevHash" maxlength="64" class="session-prev-hash"
+              placeholder="64-char hash of prior session">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTHOR DETAILS -->
+    <div class="author-section">
+      <div class="author-header" onclick="toggleAuthorPanel()">
+        <span class="author-header-label">Author Details</span>
+        <span class="author-toggle-icon" id="authorToggleIcon">▾ EXPAND</span>
+      </div>
+      <div id="authorFields" style="display:none">
+        <div class="author-fields">
+          <span class="author-field-label">Author</span>
+          <input type="text" id="inputAuthor" placeholder="Author name(s)" value="Craig Ellenwood × Claude (Anthropic)" onchange="saveAuthorPrefs()">
+          <span class="author-field-label">Org</span>
+          <input type="text" id="inputOrg" placeholder="Organization" value="Haawke Neural Technology" onchange="saveAuthorPrefs()">
+          <span class="author-field-label">ORCID</span>
+          <input type="text" id="inputOrcid" placeholder="ORCID iD (e.g. 0009-0001-6475-5109)" value="0009-0001-6475-5109" onchange="saveAuthorPrefs()">
+        </div>
+      </div>
+    </div>
+
     <button class="btn btn-full" onclick="generateHash()">Generate Hash</button>
   </div>
 
@@ -494,6 +751,7 @@
       <div class="hash-display">
         <div class="hash-label">SHA-256</div>
         <div class="hash-value" id="hashValue">—</div>
+        <div class="hash-full" id="hashFull" style="display:none"></div>
         <div class="hash-meta" id="hashMeta"></div>
       </div>
 
@@ -520,9 +778,46 @@
         </div>
       </div>
 
-      <button class="btn btn-gold btn-full" onclick="saveToLog()">Save to Provenance Log</button>
+      <!-- CHAIN OUTPUT — session hashes only -->
+      <div id="chainSection" style="display:none">
+        <div class="chain-output">
+          <div class="chain-output-title">Memory Chain Output</div>
+          <div class="format-block" style="margin-bottom:10px">
+            <div class="format-title">Chain Entry JSON</div>
+            <div class="format-code" id="fmtChain"></div>
+            <button class="copy-btn" onclick="copyFormat('fmtChain', this)">Copy</button>
+          </div>
+          <div class="cert-buttons">
+            <button class="btn" style="margin:0;flex:1" onclick="downloadChainEntry()">Download .chain Entry</button>
+            <button class="btn btn-gold" style="margin:0;flex:1" onclick="copyContinuityBlock()">Copy Continuity Block</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold btn-full" onclick="saveToLog()" id="saveLogBtn">Save to Provenance Log</button>
       <button class="btn btn-full" style="margin-top:8px;" onclick="stampToBlockchain()" id="ots-btn">Timestamp to Blockchain via OpenTimestamps</button>
       <div id="ots-status" style="display:none; margin-top:12px; padding:14px 18px; border:1px solid var(--border); font-size:11px; color:var(--dim); line-height:1.8; letter-spacing:0.08em;"></div>
+      <!-- METADATA / XMP -->
+      <div id="exifSection" class="exif-section" style="display:none">
+        <div class="exif-title">File Metadata</div>
+        <div class="exif-info" id="exifInfo"></div>
+        <div id="exifEmbedBtn" style="display:none;margin-bottom:8px">
+          <button class="btn btn-exif" style="width:100%" onclick="embedAndDownload()">Embed Provenance in Image</button>
+        </div>
+        <button class="btn btn-exif" onclick="downloadXmpSidecar()">Download XMP Sidecar (.xmp)</button>
+      </div>
+      <!-- CERTIFICATE + QR -->
+      <div id="certSection" class="cert-section" style="display:none">
+        <div class="cert-header">
+          <span class="cert-title">Provenance Certificate</span>
+          <span class="cert-hint">For portfolios, submissions &amp; archives</span>
+        </div>
+        <div id="qrPreview" style="margin-top:12px;text-align:center;display:none"></div>
+        <div class="cert-buttons">
+          <button class="btn btn-gold" style="margin:0;flex:1" onclick="downloadCertificate()">Download Certificate PDF</button>
+          <button class="btn" style="margin:0;flex:1" onclick="downloadQrCode()">Download QR Code</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -540,26 +835,42 @@
     </div>
   </div>
 
+  <!-- MEMORY CHAIN VIEWER -->
+  <div class="chain-viewer" id="chainViewer" style="display:none">
+    <div class="log-header">
+      <div class="panel-label" style="margin:0">Memory Chain</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="padding:8px 16px;font-size:10px" onclick="exportChain()">Export JSON</button>
+        <button class="btn" style="padding:8px 16px;font-size:10px;border-color:rgba(255,80,80,0.4);color:rgba(255,80,80,0.6)" onclick="clearChain()">Clear</button>
+      </div>
+    </div>
+    <div id="chainContainer">
+      <div class="empty-log">No chain entries yet. Use the Session tab to record your first session.</div>
+    </div>
+  </div>
+
   <footer>
     <span class="pulse"></span>
     Haawke Hash · SHA-256 Provenance Tool · Runs entirely in your browser · No data transmitted<br>
     Craig Ellenwood × Claude (Anthropic) · Haawke Neural Technology · 2026<br>
-    ORCID 0009-0001-6475-5109 · haawke.com<br><br>
-    <span style="color:rgba(201,168,76,0.6);letter-spacing:0.08em;">Cite as:</span> Ellenwood, C. &amp; Claude (Anthropic). (2026). Haawke Hash: Cryptographic Provenance for Human-AI Collaborative Works (v1.0). Haawke Neural Technology. https://hash.haawke.com
+    ORCID 0009-0001-6475-5109 · haawke.com
   </footer>
 
 </div>
 
 <script>
   let currentHash = null;
+  let currentFileType = null;
   let currentMeta = {};
+  let currentSessionData = null;
   let log = JSON.parse(localStorage.getItem('haawke-hash-log') || '[]');
 
   // TAB SWITCHING
+  const TAB_IDS = ['file', 'text', 'url', 'session'];
   function switchTab(tab) {
-    ['file','text','url'].forEach(t => {
-      document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
-      document.querySelectorAll('.tab')[['file','text','url'].indexOf(t)].classList.toggle('active', t === tab);
+    TAB_IDS.forEach(t => {
+      document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+      document.querySelectorAll('.tab')[TAB_IDS.indexOf(t)].classList.toggle('active', t === tab);
     });
   }
 
@@ -592,10 +903,36 @@
     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
 
+  // Validates + reads session form — returns parsed data or null (shows alert on failure)
+  function readSessionInputs() {
+    const title = document.getElementById('sessionTitle').value.trim();
+    if (!title) { alert('Session Title is required.'); return null; }
+    const date = document.getElementById('sessionDate').value;
+    if (!date) { alert('Date is required.'); return null; }
+    const summary = document.getElementById('sessionSummary').value.trim();
+    if (!summary) { alert('Summary is required.'); return null; }
+    const prevHash = document.getElementById('sessionPrevHash').value.trim().toLowerCase() || null;
+    if (prevHash && !/^[0-9a-f]{64}$/.test(prevHash)) {
+      alert('Previous Hash must be 64 hex characters, or leave blank.');
+      return null;
+    }
+    const participants = document.getElementById('sessionParticipants').value.trim() || getAuthor();
+    const decisions = document.getElementById('sessionDecisions').value.split('\n').map(l => l.trim()).filter(Boolean);
+    const artifacts = document.getElementById('sessionArtifacts').value.split('\n').map(l => l.trim()).filter(Boolean).sort();
+    const slug = `${date}-${title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+    const serialized = JSON.stringify({ artifacts, date, key_decisions: decisions, participants, previous_hash: prevHash, summary, title, type: 'memory-chain' });
+    const buffer = new TextEncoder().encode(serialized);
+    return {
+      buffer, name: slug, size: formatBytes(buffer.byteLength), fileType: 'application/json',
+      sessionData: { title, date, participants, summary, decisions, artifacts, prevHash, slug }
+    };
+  }
+
   async function generateHash() {
     const activeTab = document.querySelector('.tab.active').textContent.toLowerCase().trim();
+    currentSessionData = null;
 
-    let buffer, name, size;
+    let buffer, name, size, fileType;
 
     if (activeTab === 'file') {
       const file = dropZone._file;
@@ -603,19 +940,26 @@
       buffer = await file.arrayBuffer();
       name = file.name;
       size = formatBytes(file.size);
+      fileType = file.type;
     } else if (activeTab === 'text / html') {
       const text = document.getElementById('textInput').value;
       if (!text.trim()) { alert('Please enter some text to hash.'); return; }
       buffer = new TextEncoder().encode(text);
       name = 'text input';
       size = formatBytes(buffer.byteLength);
+      fileType = 'text/plain';
+    } else if (activeTab === 'session') {
+      const parsed = readSessionInputs();
+      if (!parsed) return;
+      ({ buffer, name, size, fileType } = parsed);
+      currentSessionData = parsed.sessionData;
     } else {
       alert('For URLs, use the Fetch & Hash button.');
       return;
     }
 
     const hash = await sha256(buffer);
-    displayResult(hash, name, size);
+    displayResult(hash, name, size, fileType);
   }
 
   async function fetchAndHash() {
@@ -627,49 +971,106 @@
       const data = await res.json();
       const buffer = new TextEncoder().encode(data.contents);
       const hash = await sha256(buffer);
-      displayResult(hash, url, formatBytes(buffer.byteLength));
+      displayResult(hash, url, formatBytes(buffer.byteLength), 'text/html');
     } catch(e) {
       alert('Could not fetch URL. Try pasting the page source into the Text tab instead.');
     }
   }
 
-  function displayResult(hash, name, size) {
+  function displayResult(hash, name, size, fileType) {
     currentHash = hash;
+    currentFileType = fileType || null;
     const now = new Date();
     const ts = now.toISOString();
     const tsHuman = now.toLocaleString('en-US', { dateStyle:'long', timeStyle:'short' });
+    const author = getAuthor();
+    const org = getOrg();
+    const orcid = getOrcid();
 
-    currentMeta = { hash, name, size, ts, tsHuman };
+    currentMeta = { hash, name, size, ts, tsHuman, author, org, orcid };
 
-    document.getElementById('hashValue').textContent = hash;
+    // Abbreviated hash display — first 16 + last 8, full hash shown dimmed below
+    const shortHash = `${hash.slice(0,16)} ··· ${hash.slice(-8)}`;
+    document.getElementById('hashValue').textContent = shortHash;
+    const hashFullEl = document.getElementById('hashFull');
+    hashFullEl.textContent = hash;
+    hashFullEl.style.display = 'block';
+
     document.getElementById('hashMeta').innerHTML =
       `Source: ${name}<br>Size: ${size}<br>Timestamp: ${tsHuman}<br>ISO: ${ts}`;
 
-    // Formats
+    // Formats — pre-compute optional lines to avoid nested template literals
+    const orcidHtmlLine = orcid ? `\n  ORCID ${orcid}` : '';
+    const orgTextLine   = org   ? `\n${org}` : '';
+    const orcidTextLine = orcid ? `\nORCID: ${orcid}` : '';
+
     document.getElementById('fmtHtml').textContent =
 `<!-- Haawke Provenance -->
 <footer class="provenance">
   SHA-256: ${hash}
   ${tsHuman}
-  Craig Ellenwood × Claude (Anthropic)
-  ORCID 0009-0001-6475-5109
+  ${author}${orcidHtmlLine}
 </footer>`;
 
     document.getElementById('fmtText').textContent =
 `SHA-256: ${hash}
 Authored: ${tsHuman}
-Craig Ellenwood × Claude (Anthropic)
-Haawke Neural Technology
-ORCID: 0009-0001-6475-5109`;
+${author}${orgTextLine}${orcidTextLine}`;
 
     document.getElementById('fmtZenodo').textContent =
-`Ellenwood, C. & Claude (Anthropic). (2026).
-[${name}]. Haawke Neural Technology.
-SHA-256: ${hash}
-ORCID: 0009-0001-6475-5109`;
+`${author}. (${now.getFullYear()}).
+[${name}]. ${org || 'Independent'}.
+SHA-256: ${hash}${orcidTextLine}`;
 
     document.getElementById('fmtJson').textContent =
-JSON.stringify({ sha256: hash, source: name, authored: ts, authors: ["Craig Ellenwood","Claude (Anthropic)"], orcid: "0009-0001-6475-5109", org: "Haawke Neural Technology" }, null, 2);
+JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, tool: 'Haawke Hash — Provenance Tool' }, null, 2);
+
+    // Chain section — session hashes only
+    const chainSection = document.getElementById('chainSection');
+    const saveBtn = document.getElementById('saveLogBtn');
+    if (currentSessionData) {
+      const entry = buildChainEntry(hash);
+      document.getElementById('fmtChain').textContent = JSON.stringify(entry, null, 2);
+      chainSection.style.display = 'block';
+      saveBtn.textContent = 'Save Session to Registry & Chain';
+      saveBtn.className = 'btn btn-gold btn-full';
+    } else {
+      chainSection.style.display = 'none';
+      saveBtn.textContent = 'Save to Provenance Log';
+      saveBtn.className = 'btn btn-gold btn-full';
+    }
+
+    // Metadata section — always visible, embed button only for JPEG/PNG
+    const isJpeg = fileType === 'image/jpeg' || fileType === 'image/jpg';
+    const isPng  = fileType === 'image/png';
+    const isAudio = fileType?.startsWith('audio/');
+    const exifEmbedBtn = document.getElementById('exifEmbedBtn');
+    if (isJpeg || isPng) {
+      const fmt = isPng ? 'PNG (XMP iTXt chunk)' : 'JPEG (XMP APP1 segment)';
+      document.getElementById('exifInfo').innerHTML =
+        `Embeds SHA-256, author, org &amp; ORCID directly into ${fmt} metadata. Readable by Lightroom, Bridge, Preview, ExifTool, and any XMP-aware tool.`;
+      exifEmbedBtn.style.display = 'block';
+    } else if (isAudio) {
+      document.getElementById('exifInfo').innerHTML =
+        `XMP sidecar works with most audio tools. For ID3 tag embedding (MP3), use the .xmp file with Mp3tag or Kid3.`;
+      exifEmbedBtn.style.display = 'none';
+    } else {
+      document.getElementById('exifInfo').innerHTML =
+        `Download an XMP sidecar (.xmp) to accompany this work — supported by Adobe Creative Cloud, Lightroom, Bridge, Capture One, and archival tools.`;
+      exifEmbedBtn.style.display = 'none';
+    }
+    document.getElementById('exifSection').style.display = 'block';
+
+    // Certificate + QR section — always visible
+    const certSection = document.getElementById('certSection');
+    certSection.style.display = 'block';
+    const verifyUrl = `https://verify.haawke.com/#${hash}`;
+    const qrPreview = document.getElementById('qrPreview');
+    qrPreview.innerHTML = '';
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrPreview, { text: verifyUrl, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M });
+      qrPreview.style.display = 'block';
+    }
 
     document.getElementById('result').classList.add('visible');
     document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -694,25 +1095,36 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, authors: ["Craig Elle
     const btn = document.querySelector('.btn-gold');
     btn.textContent = 'Saving...';
 
+    // Save chain entry to localStorage if this is a session hash
+    if (currentSessionData) {
+      const chainEntries = JSON.parse(localStorage.getItem('haawke-memory-chain') || '[]');
+      const entry = buildChainEntry(currentMeta.hash);
+      chainEntries.unshift(entry);
+      localStorage.setItem('haawke-memory-chain', JSON.stringify(chainEntries));
+      renderChainViewer();
+    }
+
     // Register to Cloudflare KV public registry
     try {
+      const payload = {
+        hash: currentMeta.hash,
+        filename: currentMeta.name,
+        author: getAuthor(),
+        orcid: getOrcid(),
+        org: getOrg(),
+        source: 'hash.haawke.com'
+      };
+      if (currentSessionData) payload.type = 'memory-chain';
       const res = await fetch('https://haawke-verify.haawkeai.workers.dev/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          hash: currentMeta.hash,
-          filename: currentMeta.name,
-          author: 'Craig Ellenwood × Claude (Anthropic)',
-          orcid: '0009-0001-6475-5109',
-          org: 'Haawke Neural Technology',
-          source: 'hash.haawke.com'
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.status === 'registered') {
-        btn.textContent = '✓ Saved & Registered to Registry';
+        btn.textContent = currentSessionData ? '✓ Session Registered to Chain' : '✓ Saved & Registered to Registry';
       } else if (data.status === 'exists') {
-        btn.textContent = '✓ Saved · Already in Registry';
+        btn.textContent = '✓ Already in Registry';
       } else {
         btn.textContent = '✓ Saved to Log';
       }
@@ -733,6 +1145,7 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, authors: ["Craig Elle
       <div class="log-entry">
         <div>
           <div class="log-name">${e.name}</div>
+          ${e.author ? `<div style="font-size:11px;color:rgba(201,168,76,0.65);margin-top:2px">${e.author}</div>` : ''}
           <div class="log-hash">${e.hash}</div>
         </div>
         <div class="log-time">${e.tsHuman}</div>
@@ -833,8 +1246,487 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, authors: ["Craig Elle
     }
   }
 
+  // SESSION CHAR COUNT
+  function updateCharCount() {
+    const len = document.getElementById('sessionSummary').value.length;
+    const el  = document.getElementById('summaryCount');
+    el.textContent = `${len} / 500`;
+    el.className = len > 450 ? 'char-count char-warn' : 'char-count';
+  }
+
+  // MEMORY CHAIN — build structured chain entry from current session + hash
+  function buildChainEntry(hash) {
+    const chain = JSON.parse(localStorage.getItem('haawke-memory-chain') || '[]');
+    const { title, date, participants, summary, decisions, artifacts, prevHash, slug } = currentSessionData;
+    const participantList = participants.includes('×')
+      ? participants.split('×').map(p => p.trim())
+      : [participants];
+    return {
+      index:           chain.length + 1,
+      date,
+      slug,
+      title,
+      participants:    participantList,
+      hash,
+      previous_hash:   prevHash,
+      verify_url:      `https://verify.haawke.com/#${hash}`,
+      type:            'memory-chain',
+      ots_confirmed:   false,
+      ots_file:        `sessions/${slug}.ots`,
+      transcript_file: `sessions/${slug}.txt`,
+      summary,
+      key_decisions:   decisions,
+      artifacts,
+      ...(getOrcid() ? { orcid: getOrcid() } : {}),
+      ...(getOrg()   ? { org:   getOrg()   } : {})
+    };
+  }
+
+  function buildContinuityBlock(hash) {
+    const chain = JSON.parse(localStorage.getItem('haawke-memory-chain') || '[]');
+    const { title, date, participants, summary, decisions, prevHash } = currentSessionData;
+    const index      = chain.length + 1;
+    const orcid      = getOrcid();
+    const verifyUrl  = `https://verify.haawke.com/#${hash}`;
+    const chainLine  = prevHash ? `\nChain: extends ${prevHash.slice(0, 16)}...` : '';
+    const orcidLine  = orcid ? `\nORCID: ${orcid}` : '';
+    const decisionLines = decisions.map(d => `- ${d}`).join('\n');
+    const decisionBlock = decisions.length ? `\n\nKey decisions:\n${decisionLines}` : '';
+    return `VERIFIED MEMORY CHAIN — ${participants}
+Chain ID: craig-ellenwood-claude-memory-chain${orcidLine}
+Registry: https://verify.haawke.com
+
+SESSION ${index} — ${date}
+Title: ${title}
+Hash: ${hash}
+Verified: ${verifyUrl}
+Bitcoin timestamp: pending confirmation (~1hr after block inclusion)${chainLine}
+
+Summary: ${summary}${decisionBlock}
+
+This record is Bitcoin-timestamped and independently verifiable.
+It cannot have been altered after the registered date.
+Verify at: ${verifyUrl}`;
+  }
+
+  function downloadChainEntry() {
+    if (!currentHash || !currentSessionData) return;
+    const entry = buildChainEntry(currentHash);
+    const a     = document.createElement('a');
+    a.href      = URL.createObjectURL(new Blob([JSON.stringify(entry, null, 2)], { type: 'application/json' }));
+    a.download  = `${currentSessionData.slug}.chain.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function copyContinuityBlock() {
+    if (!currentHash || !currentSessionData) return;
+    navigator.clipboard.writeText(buildContinuityBlock(currentHash)).then(() => {
+      const btn = document.querySelector('[onclick="copyContinuityBlock()"]');
+      if (!btn) return;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    });
+  }
+
+  // CHAIN VIEWER
+  function renderChainViewer() {
+    const entries   = JSON.parse(localStorage.getItem('haawke-memory-chain') || '[]');
+    const viewer    = document.getElementById('chainViewer');
+    const container = document.getElementById('chainContainer');
+    if (!entries.length) { viewer.style.display = 'none'; return; }
+    viewer.style.display = 'block';
+    container.innerHTML = entries.map((e, i) => {
+      const shortHash = e.hash ? `${e.hash.slice(0, 16)} ··· ${e.hash.slice(-8)}` : '—';
+      const otsStatus = e.ots_confirmed
+        ? '<span class="chain-entry-ots ots-confirmed">✓ BTC Confirmed</span>'
+        : '<span class="chain-entry-ots ots-pending">⏳ Pending</span>';
+      const decisions = (e.key_decisions || [])
+        .map(d => `<div class="chain-decision">${d}</div>`).join('');
+      const decisionsBlock = decisions
+        ? `<div class="chain-decisions"><div class="chain-decisions-title">Key Decisions</div>${decisions}</div>`
+        : '';
+      return `<div class="chain-entry" onclick="toggleChainEntry(${i})">
+        <div class="chain-entry-header">
+          <div>
+            <div class="chain-entry-title">Session ${e.index || (entries.length - i)} · ${e.title || 'Untitled'}</div>
+            <div class="chain-entry-hash">${shortHash}</div>
+          </div>
+          <div>
+            <div class="chain-entry-date">${e.date || ''}</div>
+            ${otsStatus}
+          </div>
+        </div>
+        <div class="chain-entry-body" id="chain-body-${i}">
+          ${e.summary ? `<div class="chain-summary">${e.summary}</div>` : ''}
+          ${decisionsBlock}
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <a href="${e.verify_url || ''}" target="_blank"
+               style="color:var(--blue);font-size:11px;letter-spacing:.08em">Verify ↗</a>
+            <button class="btn" style="padding:5px 12px;font-size:10px;margin:0"
+              onclick="copyContinuityBlockFromChain(${i});event.stopPropagation()">
+              Copy Continuity Block
+            </button>
+          </div>
+          <div style="margin-top:6px;font-size:10px;color:rgba(79,168,232,0.5);word-break:break-all">${e.hash || ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function toggleChainEntry(i) {
+    document.getElementById(`chain-body-${i}`)?.classList.toggle('open');
+  }
+
+  function copyContinuityBlockFromChain(i) {
+    const entries = JSON.parse(localStorage.getItem('haawke-memory-chain') || '[]');
+    const e = entries[i];
+    if (!e) return;
+    const orcid = getOrcid();
+    const pList = Array.isArray(e.participants) ? e.participants.join(' × ') : (e.participants || '');
+    const orcidLine = orcid ? `\nORCID: ${orcid}` : '';
+    const kd = e.key_decisions || [];
+    const kdLines = kd.map(d => `- ${d}`).join('\n');
+    const decisionBlock = kd.length ? `\n\nKey decisions:\n${kdLines}` : '';
+    const block = `VERIFIED MEMORY CHAIN — ${pList}
+Chain ID: craig-ellenwood-claude-memory-chain${orcidLine}
+Registry: https://verify.haawke.com
+
+SESSION ${e.index || ''} — ${e.date || ''}
+Title: ${e.title || ''}
+Hash: ${e.hash || ''}
+Verified: ${e.verify_url || ''}
+Bitcoin timestamp: ${e.ots_confirmed ? 'confirmed' : 'pending confirmation (~1hr after block inclusion)'}
+
+Summary: ${e.summary || ''}${decisionBlock}
+
+This record is Bitcoin-timestamped and independently verifiable.
+It cannot have been altered after the registered date.`;
+    navigator.clipboard.writeText(block).then(() => {
+      const btn = event.target.closest('button');
+      if (!btn) return;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => { btn.textContent = 'Copy Continuity Block'; }, 2000);
+    });
+  }
+
+  function exportChain() {
+    const entries = JSON.parse(localStorage.getItem('haawke-memory-chain') || '[]');
+    const chain = {
+      chain_id: 'craig-ellenwood-claude-memory-chain',
+      authors:  [getAuthor()],
+      orcid:    getOrcid(),
+      org:      getOrg(),
+      registry: 'https://verify.haawke.com',
+      exported: new Date().toISOString(),
+      sessions: [...entries].reverse()
+    };
+    const a   = document.createElement('a');
+    a.href    = URL.createObjectURL(new Blob([JSON.stringify(chain, null, 2)], { type: 'application/json' }));
+    a.download = 'claude-memory-chain.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function clearChain() {
+    if (!confirm('Clear the entire Memory Chain? This cannot be undone.')) return;
+    localStorage.removeItem('haawke-memory-chain');
+    renderChainViewer();
+  }
+
+  // Expose chain functions called from inline HTML onclick attributes
+  globalThis.updateCharCount            = updateCharCount;
+  globalThis.downloadChainEntry         = downloadChainEntry;
+  globalThis.copyContinuityBlock        = copyContinuityBlock;
+  globalThis.toggleChainEntry           = toggleChainEntry;
+  globalThis.copyContinuityBlockFromChain = copyContinuityBlockFromChain;
+  globalThis.exportChain                = exportChain;
+  globalThis.clearChain                 = clearChain;
+
+  // AUTHOR FIELD HELPERS
+  function getAuthor() {
+    return document.getElementById('inputAuthor').value.trim() || 'Unknown Author';
+  }
+  function getOrg() {
+    return document.getElementById('inputOrg').value.trim();
+  }
+  function getOrcid() {
+    return document.getElementById('inputOrcid').value.trim();
+  }
+  function saveAuthorPrefs() {
+    localStorage.setItem('haawke-author', getAuthor());
+    localStorage.setItem('haawke-org', getOrg());
+    localStorage.setItem('haawke-orcid', getOrcid());
+  }
+  function loadAuthorPrefs() {
+    const a  = localStorage.getItem('haawke-author');
+    const o  = localStorage.getItem('haawke-org');
+    const id = localStorage.getItem('haawke-orcid');
+    if (a  !== null) document.getElementById('inputAuthor').value = a;
+    if (o  !== null) document.getElementById('inputOrg').value    = o;
+    if (id !== null) document.getElementById('inputOrcid').value  = id;
+  }
+  function toggleAuthorPanel() {
+    const fields = document.getElementById('authorFields');
+    const icon   = document.getElementById('authorToggleIcon');
+    const open   = fields.style.display === 'none';
+    fields.style.display  = open ? 'block' : 'none';
+    icon.textContent      = open ? '▴ COLLAPSE' : '▾ EXPAND';
+  }
+
+  // CRC32 — required for PNG iTXt chunk checksums
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+      t[i] = c;
+    }
+    return t;
+  })();
+  function crc32(data) {
+    let crc = -1;
+    for (const byte of data) crc = CRC_TABLE[(crc ^ byte) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ -1) >>> 0;
+  }
+
+  // XMP / EXIF EMBEDDING
+  function escapeXml(s) {
+    return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+  }
+
+  function buildXmpPacket(hash, author, org, orcid, filename, ts) {
+    const orcidLine = orcid ? `\n      <haawke:orcid>${escapeXml(orcid)}</haawke:orcid>` : '';
+    const orgLine   = org   ? `\n      <haawke:org>${escapeXml(org)}</haawke:org>`         : '';
+    return `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Haawke Hash — Provenance Tool">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmlns:haawke="https://haawke.com/ns/provenance/1.0/">
+      <dc:creator><rdf:Seq><rdf:li>${escapeXml(author)}</rdf:li></rdf:Seq></dc:creator>
+      <dc:description><rdf:Alt><rdf:li xml:lang="x-default">SHA-256: ${escapeXml(hash)}</rdf:li></rdf:Alt></dc:description>
+      <xmp:CreateDate>${ts}</xmp:CreateDate>
+      <xmp:MetadataDate>${ts}</xmp:MetadataDate>
+      <xmp:CreatorTool>Haawke Hash — Provenance Tool</xmp:CreatorTool>
+      <haawke:sha256>${escapeXml(hash)}</haawke:sha256>${orcidLine}${orgLine}
+      <haawke:source>${escapeXml(filename)}</haawke:source>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+  }
+
+  function injectXmpIntoJpeg(jpegBytes, xmpString) {
+    const header = new TextEncoder().encode('http://ns.adobe.com/xap/1.0/\0');
+    const body   = new TextEncoder().encode(xmpString);
+    const segLen = 2 + header.length + body.length;
+    const seg    = new Uint8Array(4 + header.length + body.length);
+    seg[0] = 0xFF; seg[1] = 0xE1;
+    seg[2] = (segLen >> 8) & 0xFF; seg[3] = segLen & 0xFF;
+    seg.set(header, 4);
+    seg.set(body, 4 + header.length);
+    const out = new Uint8Array(jpegBytes.length + seg.length);
+    out.set(jpegBytes.slice(0, 2));
+    out.set(seg, 2);
+    out.set(jpegBytes.slice(2), 2 + seg.length);
+    return out;
+  }
+
+  function injectXmpIntoPng(pngBytes, xmpString) {
+    const type = new TextEncoder().encode('iTXt');
+    const kw   = new TextEncoder().encode('XML:com.adobe.xmp');
+    const txt  = new TextEncoder().encode(xmpString);
+    // iTXt data: keyword + \0 + comp_flag + comp_method + lang_tag\0 + trans_kw\0 + text
+    const data = new Uint8Array(kw.length + 5 + txt.length);
+    data.set(kw);
+    data[kw.length] = 0; data[kw.length + 1] = 0; data[kw.length + 2] = 0;
+    data[kw.length + 3] = 0; data[kw.length + 4] = 0;
+    data.set(txt, kw.length + 5);
+    const crcIn = new Uint8Array(type.length + data.length);
+    crcIn.set(type); crcIn.set(data, type.length);
+    const chunk = new Uint8Array(4 + 4 + data.length + 4);
+    const dv = new DataView(chunk.buffer);
+    dv.setUint32(0, data.length, false);
+    chunk.set(type, 4);
+    chunk.set(data, 8);
+    dv.setUint32(8 + data.length, crc32(crcIn), false);
+    // Insert after PNG signature (8 bytes) + IHDR chunk (4+4+13+4 = 25 bytes)
+    const pos = 33;
+    const out = new Uint8Array(pngBytes.length + chunk.length);
+    out.set(pngBytes.slice(0, pos));
+    out.set(chunk, pos);
+    out.set(pngBytes.slice(pos), pos + chunk.length);
+    return out;
+  }
+
+  async function embedAndDownload() {
+    if (!currentHash || !dropZone._file) return;
+    const file   = dropZone._file;
+    const ts     = new Date().toISOString();
+    const xmp    = buildXmpPacket(currentHash, getAuthor(), getOrg(), getOrcid(), file.name, ts);
+    const bytes  = new Uint8Array(await file.arrayBuffer());
+    const isJpeg = file.type === 'image/jpeg' || file.type === 'image/jpg';
+    const result = isJpeg ? injectXmpIntoJpeg(bytes, xmp) : injectXmpIntoPng(bytes, xmp);
+    const dot    = file.name.lastIndexOf('.');
+    const base   = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const ext    = dot > 0 ? file.name.slice(dot) : '';
+    const a      = document.createElement('a');
+    a.href       = URL.createObjectURL(new Blob([result], { type: file.type }));
+    a.download   = `${base}_provenance${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function downloadXmpSidecar() {
+    if (!currentHash) return;
+    const meta = currentMeta;
+    const name = meta.name || 'file';
+    const ts   = meta.ts || new Date().toISOString();
+    const xmp  = buildXmpPacket(currentHash, getAuthor(), getOrg(), getOrcid(), name, ts);
+    const dot  = name.lastIndexOf('.');
+    const base = dot > 0 ? name.slice(0, dot) : name;
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(new Blob([xmp], { type: 'application/rdf+xml' }));
+    a.download = `${base}.xmp`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // QR CODE
+  function getQrCanvas(url, size) {
+    return new Promise(resolve => {
+      if (typeof QRCode === 'undefined') { resolve(null); return; }
+      const div = document.createElement('div');
+      div.style.cssText = 'position:absolute;left:-9999px;top:-9999px';
+      document.body.appendChild(div);
+      div.qr = new QRCode(div, { text: url, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+      setTimeout(() => {
+        const canvas = div.querySelector('canvas');
+        div.remove();
+        resolve(canvas);
+      }, 100);
+    });
+  }
+
+  async function downloadQrCode() {
+    if (!currentHash) return;
+    const url    = `https://verify.haawke.com/#${currentHash}`;
+    const canvas = await getQrCanvas(url, 400);
+    if (!canvas) { alert('QR code library not loaded. Please check your connection.'); return; }
+    const base = (currentMeta.name || 'file').replace(/\.[^.]+$/, '');
+    const a    = document.createElement('a');
+    a.href     = canvas.toDataURL('image/png');
+    a.download = `${base}_qr.png`;
+    a.click();
+  }
+
+  // CERTIFICATE PDF (opens print window — Save as PDF from the print dialog)
+  function downloadCertificate() {
+    if (!currentHash) return;
+    const hash      = currentHash;
+    const author    = getAuthor();
+    const org       = getOrg();
+    const orcid     = getOrcid();
+    const meta      = currentMeta;
+    const shortHash = `${hash.slice(0, 16)} ··· ${hash.slice(-8)}`;
+    const verifyUrl = `https://verify.haawke.com/#${hash}`;
+    const tsHuman   = meta.tsHuman || new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
+    const year      = new Date(meta.ts || Date.now()).getFullYear();
+
+    const authorRow = author ? `<div class="row"><div class="lbl">Author</div><div class="val">${escapeXml(author)}</div></div>` : '';
+    const orgRow    = org    ? `<div class="row"><div class="lbl">Organization</div><div class="val">${escapeXml(org)}</div></div>` : '';
+    const orcidRow  = orcid  ? `<div class="row"><div class="lbl">ORCID iD</div><div class="val mono">${escapeXml(orcid)}</div></div>` : '';
+    const sizeRow   = meta.size ? `<div class="row"><div class="lbl">File Size</div><div class="val mono">${meta.size}</div></div>` : '';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Haawke Provenance Certificate</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Courier+Prime:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:210mm;height:297mm;background:#fff}
+  .page{width:210mm;height:297mm;padding:16mm 18mm;display:flex;flex-direction:column;font-family:'Courier Prime','Courier New',monospace;color:#1a1612;position:relative}
+  .border{position:absolute;inset:9mm;border:1.5px solid #c9a84c;pointer-events:none}
+  .border2{position:absolute;inset:11mm;border:0.4px solid rgba(201,168,76,0.35);pointer-events:none}
+  .eyebrow{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:#c9a84c;text-align:center;margin-bottom:5mm;margin-top:4mm}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:26pt;text-align:center;color:#1a1612;margin-bottom:2mm;letter-spacing:.02em}
+  h1 em{font-style:italic;color:#4fa8e8}
+  .sub{font-size:7.5pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(26,22,18,.45);text-align:center;margin-bottom:5mm}
+  hr{border:none;border-top:.4px solid #c9a84c;margin:0 10mm 5mm}
+  .body{display:flex;gap:7mm;flex:1}
+  .fields{flex:1}
+  .row{margin-bottom:3.5mm}
+  .lbl{font-size:6.5pt;letter-spacing:.22em;text-transform:uppercase;color:#c9a84c;margin-bottom:.8mm}
+  .val{font-size:10.5pt;color:#1a1612;line-height:1.4}
+  .val.mono{font-family:'Courier Prime',monospace;font-size:9pt}
+  .hash-abbr{font-family:'Courier Prime',monospace;font-size:10pt;color:#1a1612}
+  .hash-full{font-family:'Courier Prime',monospace;font-size:7pt;color:rgba(26,22,18,.45);word-break:break-all;margin-top:1.5mm;line-height:1.5}
+  .verify-url{font-family:'Courier Prime',monospace;font-size:7.5pt;color:#4fa8e8}
+  .qr-col{width:36mm;display:flex;flex-direction:column;align-items:center;gap:2.5mm;padding-top:1mm}
+  .qr-box{width:34mm;height:34mm;border:1px solid rgba(201,168,76,.35);padding:1.5mm;display:flex;align-items:center;justify-content:center}
+  .qr-box img,.qr-box canvas{width:100%!important;height:100%!important}
+  .qr-lbl{font-size:6pt;letter-spacing:.12em;text-transform:uppercase;color:rgba(26,22,18,.4);text-align:center}
+  .footer{border-top:.4px solid rgba(201,168,76,.35);padding-top:3.5mm;margin-top:3mm;font-size:6.5pt;color:rgba(26,22,18,.38);letter-spacing:.08em;text-align:center;line-height:1.9}
+  @media print{html,body{width:210mm;height:297mm}@page{margin:0;size:A4}.page{page-break-after:avoid}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="border"></div><div class="border2"></div>
+  <div class="eyebrow">Haawke Neural Technology &nbsp;&middot;&nbsp; Public Provenance Registry</div>
+  <h1>Provenance <em>Certificate</em></h1>
+  <div class="sub">Cryptographic Record of Authorship</div>
+  <hr>
+  <div class="body">
+    <div class="fields">
+      ${authorRow}${orgRow}${orcidRow}
+      <div class="row" style="margin-top:2mm"><div class="lbl">Work / File</div><div class="val">${escapeXml(meta.name || '—')}</div></div>
+      ${sizeRow}
+      <div class="row" style="margin-top:2mm"><div class="lbl">Registered</div><div class="val">${escapeXml(tsHuman)}</div></div>
+      <div class="row" style="margin-top:2mm">
+        <div class="lbl">SHA-256 Hash</div>
+        <div class="val hash-abbr">${escapeXml(shortHash)}</div>
+        <div class="hash-full">${escapeXml(hash)}</div>
+      </div>
+      <div class="row" style="margin-top:2mm"><div class="lbl">Verify at</div><div class="val verify-url">${escapeXml(verifyUrl)}</div></div>
+    </div>
+    <div class="qr-col">
+      <div class="qr-box" id="certQr"></div>
+      <div class="qr-lbl">Scan to verify</div>
+    </div>
+  </div>
+  <div class="footer">
+    This certificate records the cryptographic hash of the above work at time of registration.<br>
+    Verify authenticity at verify.haawke.com &nbsp;&middot;&nbsp; Haawke Hash &mdash; Provenance Tool &nbsp;&middot;&nbsp; ${year}
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\x2Fscript>
+<script>
+  new QRCode(document.getElementById('certQr'), {
+    text: '${verifyUrl}',
+    width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M
+  });
+  setTimeout(() => window.print(), 700);
+<\x2Fscript>
+</body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  }
+
   // INIT
   renderLog();
+  loadAuthorPrefs();
+  renderChainViewer();
+  document.getElementById('sessionDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('sessionParticipants').value = getAuthor();
 </script>
 
 <!-- HAAWKE PROVENANCE BADGE -->
@@ -923,10 +1815,8 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, authors: ["Craig Elle
     return;
   }
   try {
-    // Fetch raw file — stable, not affected by browser/Netlify DOM injection
-    const fileResp = await fetch('./index.html?nocache=' + Date.now());
-    const fileText = await fileResp.text();
-    const data = new TextEncoder().encode(fileText);
+    const html = document.documentElement.outerHTML;
+    const data = new TextEncoder().encode(html);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const liveHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
     const matches = liveHash.toLowerCase() === storedHash.toLowerCase();
