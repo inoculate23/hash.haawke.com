@@ -170,6 +170,8 @@ BibTeX:
 Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)  
 See [LICENSE](LICENSE)
 
+U.S. Copyright Registration: 1-15179233921 (June 5, 2026)
+
 ---
 
 *Craig Ellenwood × Claude (Anthropic) · Haawke Neural Technology · 2026*  
