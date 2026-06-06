@@ -1,5 +1,5 @@
 # Haawke Hash
-
+![Haawke Hash](https://hash.haawke.com/background.jpg)
 **Cryptographic provenance tool for human-AI collaborative works.**
 
 Live: [hash.haawke.com](https://hash.haawke.com)  
