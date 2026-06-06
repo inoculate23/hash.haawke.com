@@ -11,7 +11,7 @@ ORCID: [0009-0001-6475-5109](https://orcid.org/0009-0001-6475-5109)
 
 ## What It Does
 
-A browser-based SHA-256 hashing and provenance registration tool. Drop any file, paste text, or point at a URL — Haawke Hash computes a cryptographic fingerprint and lets you register it to the public Haawke Provenance Registry, export formatted citations, and anchor the hash to the Bitcoin blockchain via OpenTimestamps.
+A browser-based SHA-256 hashing and provenance registration tool. Drop any file, paste text, point at a URL, or record a structured session — Haawke Hash computes a cryptographic fingerprint, registers it to the public Haawke Provenance Registry, and anchors it to the Bitcoin blockchain via OpenTimestamps.
 
 Runs entirely in your browser. No data is transmitted except when explicitly registering to the registry or timestamping to the blockchain.
 
@@ -20,10 +20,16 @@ Runs entirely in your browser. No data is transmitted except when explicitly reg
 ## Features
 
 - **Hash any input** — file (HTML, PDF, MP3, MP4, GLB, any format), pasted text, or a live URL
+- **Author details** — attach author name, organisation, and ORCID to every hash; saved to `localStorage` so they pre-populate on return visits
+- **Abbreviated hash display** — shows first 16 + last 8 characters in the UI; full 64-char hash always copied and stored
 - **Export provenance records** in four formats: HTML footer embed, plain text/email, Zenodo citation, JSON
+- **Embed provenance in image metadata** — writes XMP into JPEG or PNG and re-downloads the file; XMP sidecar (`.xmp`) download for PDF, video, audio, and other formats
+- **Provenance certificate** — one-click A4 PDF certificate with author, org, ORCID, hash, timestamp, verify URL, and QR code; generated via browser print dialog
+- **QR code** — generated for the verify URL at hash time; downloadable standalone and embedded in the certificate
 - **Register to the public registry** — appends the hash to the Haawke Provenance Registry (Cloudflare KV, append-only, first-write-wins)
-- **Blockchain timestamp** — submits the hash to Bitcoin via OpenTimestamps; downloads a `.ots` proof file to keep alongside your work
+- **Blockchain timestamp** — submits the hash to Bitcoin via OpenTimestamps; downloads a `.ots` proof file
 - **Local provenance log** — saved to `localStorage`; exportable as JSON
+- **Memory Chain (Session tab)** — record structured session data (title, date, participants, summary, key decisions, artifacts, previous hash), hash it deterministically, and output a `.chain.json` entry for `claude-memory-chain.json` plus a plain-text Continuity Block for pasting into future Claude sessions
 - **Haawke Provenance Badge** — self-certifying badge that verifies the page's own integrity on load
 
 ---
@@ -36,10 +42,36 @@ Runs entirely in your browser. No data is transmitted except when explicitly reg
 3. Click **Generate Hash**
 4. Copy the SHA-256 and any export format you need
 
+### Add author details
+
+- Expand the **Author Details** panel below the hash input
+- Enter Author, Org, and ORCID — these are saved automatically and pre-populate on your next visit
+
+### Embed provenance in an image
+
+1. Hash a JPEG or PNG file
+2. The **File Metadata** section appears below the result
+3. Click **Embed Provenance in Image** — downloads a new copy of the file with XMP metadata written in
+4. For non-image formats, click **Download XMP Sidecar (.xmp)** to get a companion metadata file
+
+### Download a provenance certificate
+
+1. Generate a hash
+2. Click **Download Certificate PDF** — opens a print-ready A4 certificate in a new tab
+3. Save as PDF from the browser print dialog
+
+### Record a Memory Chain session
+
+1. Select the **Session** tab
+2. Fill in Title, Date, Participants, Summary, and optionally Key Decisions, Artifacts, and Previous Hash
+3. Click **Generate Hash** — hashes the session data deterministically
+4. Use **Download .chain Entry** to save the JSON entry, or **Copy Continuity Block** to copy the verified summary for pasting into a new Claude conversation
+5. Click **Save Session to Registry & Chain** — registers to the public registry and saves to the local Memory Chain viewer
+
 ### Register to the public registry
 1. Generate a hash
-2. Click **Save to Provenance Log** — this saves locally and attempts to register to the public registry
-3. If registration succeeds, the hash is permanently recorded with your authorship, ORCID, and timestamp
+2. Click **Save to Provenance Log** — saves locally and registers to the public registry
+3. The hash is permanently recorded with authorship, ORCID, and timestamp
 
 ### Timestamp to Bitcoin
 1. Generate a hash
@@ -62,6 +94,8 @@ Runs entirely in your browser. No data is transmitted except when explicitly reg
 | Plain Text / Email | Paste into correspondence, documents, or commit messages |
 | Zenodo / Citation | Academic citation format with ORCID and org |
 | JSON Record | Machine-readable provenance record |
+| `.chain.json` | Memory Chain entry for `claude-memory-chain.json` |
+| Continuity Block | Plain-text session summary for pasting into new Claude conversations |
 
 ---
 
