@@ -1815,7 +1815,8 @@ It cannot have been altered after the registered date.`;
     return;
   }
   try {
-    const html = document.documentElement.outerHTML;
+    const resp = await fetch(location.href, { cache: 'no-store' });
+    const html = await resp.text();
     const data = new TextEncoder().encode(html);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const liveHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
