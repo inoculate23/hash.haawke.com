@@ -1627,15 +1627,17 @@ It cannot have been altered after the registered date.`;
   // CERTIFICATE PDF (opens print window — Save as PDF from the print dialog)
   function downloadCertificate() {
     if (!currentHash) return;
-    const hash      = currentHash;
-    const author    = getAuthor();
-    const org       = getOrg();
-    const orcid     = getOrcid();
-    const meta      = currentMeta;
-    const shortHash = `${hash.slice(0, 16)} ··· ${hash.slice(-8)}`;
-    const verifyUrl = `https://verify.haawke.com/#${hash}`;
-    const tsHuman   = meta.tsHuman || new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
-    const year      = new Date(meta.ts || Date.now()).getFullYear();
+    const hash       = currentHash;
+    const author     = getAuthor();
+    const org        = getOrg();
+    const orcid      = getOrcid();
+    const meta       = currentMeta;
+    const shortHash  = `${hash.slice(0, 16)} ··· ${hash.slice(-8)}`;
+    const verifyUrl  = `https://verify.haawke.com/#${hash}`;
+    const tsHuman    = meta.tsHuman || new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
+    const year       = new Date(meta.ts || Date.now()).getFullYear();
+    const safeName   = (meta.name || 'file').replace(/[^a-z0-9]/gi, '_').toLowerCase().replace(/_+/g, '_').replace(/^_|_$/g, '');
+    const certTitle  = `haawke_cert_${safeName}_${hash.slice(0, 8)}_${Date.now()}`;
 
     const authorRow = author ? `<div class="row"><div class="lbl">Author</div><div class="val">${escapeXml(author)}</div></div>` : '';
     const orgRow    = org    ? `<div class="row"><div class="lbl">Organization</div><div class="val">${escapeXml(org)}</div></div>` : '';
@@ -1646,39 +1648,36 @@ It cannot have been altered after the registered date.`;
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Haawke Provenance Certificate</title>
+<title>${certTitle}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Courier+Prime:wght@400;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:210mm;height:297mm;background:#fff}
-  .page{width:210mm;height:297mm;padding:16mm 18mm;display:flex;flex-direction:column;font-family:'Courier Prime','Courier New',monospace;color:#1a1612;position:relative}
-  .border{position:absolute;inset:9mm;border:1.5px solid #c9a84c;pointer-events:none}
-  .border2{position:absolute;inset:11mm;border:0.4px solid rgba(201,168,76,0.35);pointer-events:none}
-  .eyebrow{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:#c9a84c;text-align:center;margin-bottom:5mm;margin-top:4mm}
-  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:26pt;text-align:center;color:#1a1612;margin-bottom:2mm;letter-spacing:.02em}
-  h1 em{font-style:italic;color:#4fa8e8}
-  .sub{font-size:7.5pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(26,22,18,.45);text-align:center;margin-bottom:5mm}
-  hr{border:none;border-top:.4px solid #c9a84c;margin:0 10mm 5mm}
-  .body{display:flex;gap:7mm;flex:1}
+  html,body{width:210mm;height:297mm;background:#f5f0e8}
+  .page{width:210mm;height:297mm;padding:38mm 30mm 32mm 30mm;display:flex;flex-direction:column;font-family:'Courier Prime','Courier New',monospace;color:#2a1f0e;position:relative;background:url('https://hash.haawke.com/images/hash-template-3.webp') center/cover no-repeat}
+  .eyebrow{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:#8b6914;text-align:center;margin-bottom:4mm}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:24pt;text-align:center;color:#2a1f0e;margin-bottom:1.5mm;letter-spacing:.02em}
+  h1 em{font-style:italic;color:#6b4f1a}
+  .sub{font-size:7.5pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(42,31,14,.5);text-align:center;margin-bottom:4mm}
+  hr{border:none;border-top:.4px solid rgba(139,105,20,.5);margin:0 8mm 4mm}
+  .body{display:flex;gap:6mm;flex:1}
   .fields{flex:1}
-  .row{margin-bottom:3.5mm}
-  .lbl{font-size:6.5pt;letter-spacing:.22em;text-transform:uppercase;color:#c9a84c;margin-bottom:.8mm}
-  .val{font-size:10.5pt;color:#1a1612;line-height:1.4}
-  .val.mono{font-family:'Courier Prime',monospace;font-size:9pt}
-  .hash-abbr{font-family:'Courier Prime',monospace;font-size:10pt;color:#1a1612}
-  .hash-full{font-family:'Courier Prime',monospace;font-size:7pt;color:rgba(26,22,18,.45);word-break:break-all;margin-top:1.5mm;line-height:1.5}
-  .verify-url{font-family:'Courier Prime',monospace;font-size:7.5pt;color:#4fa8e8}
-  .qr-col{width:36mm;display:flex;flex-direction:column;align-items:center;gap:2.5mm;padding-top:1mm}
-  .qr-box{width:34mm;height:34mm;border:1px solid rgba(201,168,76,.35);padding:1.5mm;display:flex;align-items:center;justify-content:center}
+  .row{margin-bottom:3mm}
+  .lbl{font-size:6.5pt;letter-spacing:.22em;text-transform:uppercase;color:#8b6914;margin-bottom:.8mm}
+  .val{font-size:10pt;color:#2a1f0e;line-height:1.4}
+  .val.mono{font-family:'Courier Prime',monospace;font-size:8.5pt}
+  .hash-abbr{font-family:'Courier Prime',monospace;font-size:9.5pt;color:#2a1f0e}
+  .hash-full{font-family:'Courier Prime',monospace;font-size:6.5pt;color:rgba(42,31,14,.45);word-break:break-all;margin-top:1.5mm;line-height:1.5}
+  .verify-url{font-family:'Courier Prime',monospace;font-size:7pt;color:#4a6b8a}
+  .qr-col{width:36mm;display:flex;flex-direction:column;align-items:center;gap:2.5mm;padding-top:1mm;transform:translateX(-8.4mm)}
+  .qr-box{width:34mm;height:34mm;border:1px solid rgba(139,105,20,.4);padding:1.5mm;background:rgba(255,252,245,.85);display:flex;align-items:center;justify-content:center}
   .qr-box img,.qr-box canvas{width:100%!important;height:100%!important}
-  .qr-lbl{font-size:6pt;letter-spacing:.12em;text-transform:uppercase;color:rgba(26,22,18,.4);text-align:center}
-  .footer{border-top:.4px solid rgba(201,168,76,.35);padding-top:3.5mm;margin-top:3mm;font-size:6.5pt;color:rgba(26,22,18,.38);letter-spacing:.08em;text-align:center;line-height:1.9}
-  @media print{html,body{width:210mm;height:297mm}@page{margin:0;size:A4}.page{page-break-after:avoid}}
+  .qr-lbl{font-size:6pt;letter-spacing:.12em;text-transform:uppercase;color:rgba(42,31,14,.4);text-align:center}
+  .footer{border-top:.4px solid rgba(139,105,20,.3);padding-top:3mm;margin-top:2mm;font-size:6pt;color:rgba(42,31,14,.4);letter-spacing:.08em;text-align:center;line-height:1.9}
+  @media print{html,body{width:210mm;height:297mm}@page{margin:0;size:A4}.page{page-break-after:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
 <div class="page">
-  <div class="border"></div><div class="border2"></div>
   <div class="eyebrow">Haawke Neural Technology &nbsp;&middot;&nbsp; Public Provenance Registry</div>
   <h1>Provenance <em>Certificate</em></h1>
   <div class="sub">Cryptographic Record of Authorship</div>
