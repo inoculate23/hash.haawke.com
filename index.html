@@ -54,6 +54,42 @@ background-image: url("./images/background.jpg") ;
     z-index: 1;
   }
 
+  /* NAV BAR */
+  .navbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    margin-bottom: 28px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    margin-right: auto;
+  }
+  .nav-brand:hover { color: var(--cream); }
+  .nav-link {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    padding: 6px 2px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav-link:hover { color: var(--blue); border-bottom-color: var(--blue); }
+  .nav-link.active { color: var(--blue); border-bottom-color: var(--blue); }
+  @media (max-width: 600px) {
+    .navbar { gap: 4px 16px; }
+    .nav-brand { width: 100%; margin-bottom: 4px; }
+  }
+
   /* HEADER */
   header {
     margin-bottom: 48px;
@@ -609,16 +645,84 @@ background-image: url("./images/background.jpg") ;
   .chain-decision {
     padding-left: 10px; border-left: 2px solid rgba(201,168,76,0.3); margin-bottom: 3px;
   }
+
+  /* CERTIFICATE TEMPLATE SELECTOR */
+  .tpl-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 12px 0 4px;
+  }
+  @media (max-width: 600px) { .tpl-grid { grid-template-columns: repeat(3, 1fr); } }
+  .tpl-card {
+    border: 1px solid var(--border);
+    padding: 10px 6px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    background: transparent;
+  }
+  .tpl-card:hover { border-color: var(--blue); }
+  .tpl-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .tpl-card.locked { opacity: 0.55; }
+  .tpl-swatch {
+    width: 100%; height: 34px; margin-bottom: 6px;
+    border: 1px solid rgba(0,0,0,0.25);
+  }
+  .tpl-name {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream);
+  }
+  .tpl-tier {
+    font-size: 9px; letter-spacing: 0.1em; color: var(--dim); margin-top: 2px;
+  }
+  .tpl-lock {
+    position: absolute; top: 4px; right: 6px; font-size: 11px;
+  }
+
+  /* LICENSE ROW */
+  .license-row {
+    display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap;
+  }
+  .license-row input[type="text"] { flex: 1; min-width: 180px; }
+  .tier-badge {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid var(--border); color: var(--dim);
+  }
+  .tier-badge.pro { border-color: var(--gold); color: var(--gold); }
+  .upgrade-note {
+    margin-top: 10px; padding: 12px 14px;
+    border: 1px solid rgba(201,168,76,0.4); background: rgba(201,168,76,0.06);
+    font-size: 12px; color: var(--dim); line-height: 1.7; letter-spacing: 0.04em;
+  }
+  .upgrade-note a { color: var(--gold); }
+
+  /* HISTORY SORT */
+  .sort-select {
+    background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--dim);
+    font-family: "Bruno Ace SC", sans-serif; font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 8px 10px; cursor: pointer; outline: none;
+  }
+  .sort-select:hover, .sort-select:focus { border-color: var(--blue); color: var(--cream); }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="container">
 
+  <nav class="navbar">
+    <a class="nav-brand" href="https://haawke.com">Haawke</a>
+    <a class="nav-link" href="https://haawke.com">Home</a>
+    <a class="nav-link active" href="https://hash.haawke.com">Hash</a>
+    <a class="nav-link" href="https://verify.haawke.com">Verify</a>
+    <a class="nav-link" href="https://haawke.com/assets/01-memory-chain-paper_v2.pdf" target="_blank" rel="noopener">Technical Paper</a>
+    <a class="nav-link" href="https://haawke.com/research/haawke-research">Research</a>
+  </nav>
+
   <header>
     <div class="header-top">
       <div class="brand">Haawke Neural Technology</div>
-      <div class="version">Provenance Tool v1.0 · SHA-256</div>
+      <div class="version">Provenance Tool v1.1 · SHA-256</div>
     </div>
     <h1>Haawke <span>Hash</span></h1>
     <div class="subtitle">
@@ -739,6 +843,17 @@ background-image: url("./images/background.jpg") ;
           <span class="author-field-label">ORCID</span>
           <input type="text" id="inputOrcid" placeholder="ORCID iD (e.g. 0009-0001-6475-5109)" value="0009-0001-6475-5109" onchange="saveAuthorPrefs()">
         </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;letter-spacing:0.12em;color:var(--dim);cursor:pointer;text-transform:uppercase">
+          <input type="checkbox" id="saveDefaultsChk" checked onchange="saveAuthorPrefs()" style="accent-color:#c9a84c">
+          Save as default
+        </label>
+        <div class="license-row">
+          <span class="author-field-label" style="width:72px">License</span>
+          <input type="text" id="licenseKeyInput" placeholder="Enter license key (Creator Pro / Studio)">
+          <button class="btn" style="padding:10px 16px;font-size:10px" onclick="applyLicenseKey()">Apply</button>
+          <span class="tier-badge" id="tierBadge">Free</span>
+        </div>
+        <div id="licenseStatus" style="display:none;margin-top:8px;font-size:11px;letter-spacing:0.06em;color:var(--dim)"></div>
       </div>
     </div>
 
@@ -806,6 +921,9 @@ background-image: url("./images/background.jpg") ;
         <div id="exifEmbedBtn" style="display:none;margin-bottom:8px">
           <button class="btn btn-exif" style="width:100%" onclick="embedAndDownload()">Embed Provenance in Image</button>
         </div>
+        <div id="id3EmbedBtn" style="display:none;margin-bottom:8px">
+          <button class="btn btn-exif" style="width:100%" onclick="embedId3AndDownload()">Download with Embedded Provenance (ID3)</button>
+        </div>
         <button class="btn btn-exif" onclick="downloadXmpSidecar()">Download XMP Sidecar (.xmp)</button>
       </div>
       <!-- CERTIFICATE + QR -->
@@ -814,6 +932,8 @@ background-image: url("./images/background.jpg") ;
           <span class="cert-title">Provenance Certificate</span>
           <span class="cert-hint">For portfolios, submissions &amp; archives</span>
         </div>
+        <div class="tpl-grid" id="tplGrid"></div>
+        <div class="upgrade-note" id="upgradeNote" style="display:none"></div>
         <div id="qrPreview" style="margin-top:12px;text-align:center;display:none"></div>
         <div class="cert-buttons">
           <button class="btn btn-gold" style="margin:0;flex:1" onclick="downloadCertificate()">Download Certificate PDF</button>
@@ -826,9 +946,16 @@ background-image: url("./images/background.jpg") ;
   <!-- LOG -->
   <div class="log-section">
     <div class="log-header">
-      <div class="panel-label" style="margin:0">Provenance Log</div>
-      <div style="display:flex;gap:8px">
+      <div class="panel-label" style="margin:0">History · Provenance Log</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="sort-select" id="logSort" onchange="renderLog()">
+          <option value="date-desc">Newest first</option>
+          <option value="date-asc">Oldest first</option>
+          <option value="name">By name</option>
+        </select>
         <button class="btn" style="padding:8px 16px;font-size:10px" onclick="exportLog()">Export</button>
+        <button class="btn" style="padding:8px 16px;font-size:10px" onclick="document.getElementById('logImportInput').click()">Import</button>
+        <input type="file" id="logImportInput" accept=".json,application/json" style="display:none" onchange="importLog(this.files[0])">
         <button class="btn" style="padding:8px 16px;font-size:10px;border-color:rgba(255,80,80,0.4);color:rgba(255,80,80,0.6)" onclick="clearLog()">Clear</button>
       </div>
     </div>
@@ -989,7 +1116,8 @@ background-image: url("./images/background.jpg") ;
     const org = getOrg();
     const orcid = getOrcid();
 
-    currentMeta = { hash, name, size, ts, tsHuman, author, org, orcid };
+    currentMeta = { hash, name, size, ts, tsHuman, author, org, orcid,
+      verify_url: `https://verify.haawke.com/#${hash}`, ots_status: 'none' };
 
     // Abbreviated hash display — first 16 + last 8, full hash shown dimmed below
     const shortHash = `${hash.slice(0,16)} ··· ${hash.slice(-8)}`;
@@ -1042,19 +1170,27 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
       saveBtn.className = 'btn btn-gold btn-full';
     }
 
-    // Metadata section — always visible, embed button only for JPEG/PNG
+    // Metadata section — always visible, embed button only for JPEG/PNG/MP3
     const isJpeg = fileType === 'image/jpeg' || fileType === 'image/jpg';
     const isPng  = fileType === 'image/png';
+    const isMp3  = fileType === 'audio/mpeg' || fileType === 'audio/mp3' || /\.mp3$/i.test(name || '');
     const isAudio = fileType?.startsWith('audio/');
     const exifEmbedBtn = document.getElementById('exifEmbedBtn');
+    const id3EmbedBtn  = document.getElementById('id3EmbedBtn');
+    id3EmbedBtn.style.display = 'none';
     if (isJpeg || isPng) {
       const fmt = isPng ? 'PNG (XMP iTXt chunk)' : 'JPEG (XMP APP1 segment)';
       document.getElementById('exifInfo').innerHTML =
         `Embeds SHA-256, author, org &amp; ORCID directly into ${fmt} metadata. Readable by Lightroom, Bridge, Preview, ExifTool, and any XMP-aware tool.`;
       exifEmbedBtn.style.display = 'block';
+    } else if (isMp3) {
+      document.getElementById('exifInfo').innerHTML =
+        `Writes haawke_sha256, haawke_author &amp; haawke_verify_url into the MP3's ID3v2 tag as TXXX frames — readable by Mp3tag, Kid3, foobar2000 and most players. Existing tags are preserved.`;
+      exifEmbedBtn.style.display = 'none';
+      id3EmbedBtn.style.display = 'block';
     } else if (isAudio) {
       document.getElementById('exifInfo').innerHTML =
-        `XMP sidecar works with most audio tools. For ID3 tag embedding (MP3), use the .xmp file with Mp3tag or Kid3.`;
+        `XMP sidecar works with most audio tools. ID3 embedding is available for MP3 files.`;
       exifEmbedBtn.style.display = 'none';
     } else {
       document.getElementById('exifInfo').innerHTML =
@@ -1062,6 +1198,10 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
       exifEmbedBtn.style.display = 'none';
     }
     document.getElementById('exifSection').style.display = 'block';
+
+    // Free-tier monthly hash counter
+    bumpHashCounter();
+    renderTplGrid();
 
     // Certificate + QR section — always visible
     const certSection = document.getElementById('certSection');
@@ -1088,11 +1228,81 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
     });
   }
 
-  // LOG
+  // LOG — OPFS-backed with localStorage fallback/mirror
+  const OPFS_LOG_FILE = 'provenance-log.json';
+  let opfsRoot = null;
+
+  async function initOpfsLog() {
+    try {
+      if (!navigator.storage?.getDirectory) return;
+      opfsRoot = await navigator.storage.getDirectory();
+      const handle = await opfsRoot.getFileHandle(OPFS_LOG_FILE, { create: true });
+      const file = await handle.getFile();
+      const text = await file.text();
+      if (text.trim()) {
+        const opfsLog = JSON.parse(text);
+        if (Array.isArray(opfsLog) && opfsLog.length >= log.length) {
+          log = opfsLog;
+        } else if (log.length) {
+          await writeOpfsLog(); // migrate localStorage log into OPFS
+        }
+      } else if (log.length) {
+        await writeOpfsLog();
+      }
+      renderLog();
+    } catch (e) {
+      opfsRoot = null; // OPFS unavailable — localStorage remains the store
+    }
+  }
+
+  async function writeOpfsLog() {
+    if (!opfsRoot) return;
+    try {
+      const handle = await opfsRoot.getFileHandle(OPFS_LOG_FILE, { create: true });
+      const writable = await handle.createWritable();
+      await writable.write(JSON.stringify(log));
+      await writable.close();
+    } catch (e) { /* fall back to localStorage mirror */ }
+  }
+
+  function persistLog() {
+    localStorage.setItem('haawke-hash-log', JSON.stringify(log));
+    writeOpfsLog();
+  }
+
+  function importLog(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = JSON.parse(reader.result);
+        if (!Array.isArray(imported)) throw new Error('not an array');
+        const seen = new Set(log.map(e => `${e.hash}|${e.ts}`));
+        let added = 0;
+        for (const e of imported) {
+          if (!e || !e.hash) continue;
+          const key = `${e.hash}|${e.ts}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          log.push(e);
+          added++;
+        }
+        log.sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+        persistLog();
+        renderLog();
+        alert(`Imported ${added} new entr${added === 1 ? 'y' : 'ies'}.`);
+      } catch (e) {
+        alert('Could not import: file is not a valid Haawke provenance log JSON.');
+      }
+    };
+    reader.readAsText(file);
+    document.getElementById('logImportInput').value = '';
+  }
+
   async function saveToLog() {
     if (!currentHash) return;
     log.unshift(currentMeta);
-    localStorage.setItem('haawke-hash-log', JSON.stringify(log));
+    persistLog();
     renderLog();
     const btn = document.querySelector('.btn-gold');
     btn.textContent = 'Saving...';
@@ -1143,16 +1353,24 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
       container.innerHTML = '<div class="empty-log">No hashes logged yet. Generate and save a hash to begin your provenance record.</div>';
       return;
     }
-    container.innerHTML = log.map(e => `
+    const sortMode = document.getElementById('logSort')?.value || 'date-desc';
+    const sorted = [...log];
+    if (sortMode === 'date-asc')  sorted.sort((a, b) => (a.ts || '').localeCompare(b.ts || ''));
+    if (sortMode === 'date-desc') sorted.sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+    if (sortMode === 'name')      sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    container.innerHTML = sorted.map(e => {
+      const ots = e.ots || e.ots_status === 'pending' || e.ots_status === 'confirmed';
+      const otsTag = ots ? `<span style="font-size:10px;letter-spacing:0.1em;color:rgba(201,168,76,0.7);margin-left:8px">⏱ OTS</span>` : '';
+      return `
       <div class="log-entry">
         <div>
-          <div class="log-name">${e.name}</div>
+          <div class="log-name">${e.name}${otsTag}</div>
           ${e.author ? `<div style="font-size:11px;color:rgba(201,168,76,0.65);margin-top:2px">${e.author}</div>` : ''}
           <div class="log-hash">${e.hash}</div>
         </div>
         <div class="log-time">${e.tsHuman}</div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function exportLog() {
@@ -1166,7 +1384,7 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
   function clearLog() {
     if (confirm('Clear the entire provenance log?')) {
       log = [];
-      localStorage.setItem('haawke-hash-log', '[]');
+      persistLog();
       renderLog();
     }
   }
@@ -1209,8 +1427,9 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
         // Update log entry with OTS stamp
         if (log.length && log[0].hash === currentHash) {
           log[0].ots = true;
+          log[0].ots_status = 'pending';
           log[0].otsTimestamp = new Date().toISOString();
-          localStorage.setItem('haawke-hash-log', JSON.stringify(log));
+          persistLog();
           renderLog();
         }
 
@@ -1457,6 +1676,9 @@ It cannot have been altered after the registered date.`;
     return document.getElementById('inputOrcid').value.trim();
   }
   function saveAuthorPrefs() {
+    const chk = document.getElementById('saveDefaultsChk');
+    localStorage.setItem('haawke-save-defaults', chk?.checked ? '1' : '0');
+    if (chk && !chk.checked) return;
     localStorage.setItem('haawke-author', getAuthor());
     localStorage.setItem('haawke-org', getOrg());
     localStorage.setItem('haawke-orcid', getOrcid());
@@ -1468,6 +1690,10 @@ It cannot have been altered after the registered date.`;
     if (a  !== null) document.getElementById('inputAuthor').value = a;
     if (o  !== null) document.getElementById('inputOrg').value    = o;
     if (id !== null) document.getElementById('inputOrcid').value  = id;
+    const chk = document.getElementById('saveDefaultsChk');
+    if (chk) chk.checked = localStorage.getItem('haawke-save-defaults') !== '0';
+    const savedKey = localStorage.getItem('haawke-license-key');
+    if (savedKey) document.getElementById('licenseKeyInput').value = savedKey;
   }
   function toggleAuthorPanel() {
     const fields = document.getElementById('authorFields');
@@ -1598,6 +1824,240 @@ It cannot have been altered after the registered date.`;
     URL.revokeObjectURL(a.href);
   }
 
+  // ID3v2 — write haawke TXXX frames into MP3 tags, preserving existing frames
+  function latin1Bytes(s) {
+    const out = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      out[i] = c <= 0xFF ? c : 0x3F;
+    }
+    return out;
+  }
+
+  function buildTxxxFrame(desc, value, version) {
+    const d = latin1Bytes(desc), v = latin1Bytes(value);
+    const body = new Uint8Array(1 + d.length + 1 + v.length);
+    body[0] = 0x00; // ISO-8859-1 encoding — valid in both v2.3 and v2.4
+    body.set(d, 1);
+    body.set(v, 2 + d.length);
+    const frame = new Uint8Array(10 + body.length);
+    frame.set(latin1Bytes('TXXX'), 0);
+    const size = body.length;
+    if (version === 4) {
+      frame[4] = (size >>> 21) & 0x7F; frame[5] = (size >>> 14) & 0x7F;
+      frame[6] = (size >>> 7)  & 0x7F; frame[7] = size & 0x7F;
+    } else {
+      frame[4] = (size >>> 24) & 0xFF; frame[5] = (size >>> 16) & 0xFF;
+      frame[6] = (size >>> 8)  & 0xFF; frame[7] = size & 0xFF;
+    }
+    frame.set(body, 10);
+    return frame;
+  }
+
+  function writeId3Provenance(mp3Bytes, fields) {
+    let version = 3;
+    let oldFrames = new Uint8Array(0);
+    let audioStart = 0;
+    const hasId3 = mp3Bytes.length > 10 &&
+      mp3Bytes[0] === 0x49 && mp3Bytes[1] === 0x44 && mp3Bytes[2] === 0x33;
+    if (hasId3) {
+      const major = mp3Bytes[3];
+      const flags = mp3Bytes[5];
+      const tagSize = ((mp3Bytes[6] & 0x7F) << 21) | ((mp3Bytes[7] & 0x7F) << 14) |
+                      ((mp3Bytes[8] & 0x7F) << 7)  |  (mp3Bytes[9] & 0x7F);
+      if ((major === 3 || major === 4) && !(flags & 0x80)) {
+        version = major;
+        audioStart = 10 + tagSize + ((flags & 0x10) ? 10 : 0);
+        const end = 10 + tagSize;
+        let pos = 10;
+        if (flags & 0x40) { // skip extended header
+          pos += major === 4
+            ? ((mp3Bytes[10] & 0x7F) << 21) | ((mp3Bytes[11] & 0x7F) << 14) | ((mp3Bytes[12] & 0x7F) << 7) | (mp3Bytes[13] & 0x7F)
+            : ((mp3Bytes[10] << 24) | (mp3Bytes[11] << 16) | (mp3Bytes[12] << 8) | mp3Bytes[13]) + 4;
+        }
+        const kept = [];
+        while (pos + 10 <= end) {
+          const id = String.fromCharCode(mp3Bytes[pos], mp3Bytes[pos+1], mp3Bytes[pos+2], mp3Bytes[pos+3]);
+          if (!/^[A-Z0-9]{4}$/.test(id)) break; // hit padding
+          const fsize = major === 4
+            ? ((mp3Bytes[pos+4] & 0x7F) << 21) | ((mp3Bytes[pos+5] & 0x7F) << 14) | ((mp3Bytes[pos+6] & 0x7F) << 7) | (mp3Bytes[pos+7] & 0x7F)
+            : ((mp3Bytes[pos+4] << 24) | (mp3Bytes[pos+5] << 16) | (mp3Bytes[pos+6] << 8) | mp3Bytes[pos+7]);
+          if (fsize <= 0 || pos + 10 + fsize > end) break;
+          // Drop previous haawke_* TXXX frames so re-embedding doesn't duplicate
+          let skip = false;
+          if (id === 'TXXX' && mp3Bytes[pos + 10] === 0) {
+            let dEnd = pos + 11;
+            while (dEnd < pos + 10 + fsize && mp3Bytes[dEnd] !== 0) dEnd++;
+            const desc = String.fromCharCode(...mp3Bytes.slice(pos + 11, dEnd));
+            if (desc.startsWith('haawke_')) skip = true;
+          }
+          if (!skip) kept.push(mp3Bytes.slice(pos, pos + 10 + fsize));
+          pos += 10 + fsize;
+        }
+        const total = kept.reduce((s, f) => s + f.length, 0);
+        oldFrames = new Uint8Array(total);
+        let o = 0;
+        for (const f of kept) { oldFrames.set(f, o); o += f.length; }
+      }
+      // v2.2 or unsynchronised tags can't be safely rewritten — leave the old
+      // tag in place after our new one (audioStart stays 0)
+    }
+    const newFrames = fields.map(([d, v]) => buildTxxxFrame(d, v, version));
+    const padding = 128;
+    const framesLen = oldFrames.length + newFrames.reduce((s, f) => s + f.length, 0);
+    const tagSize = framesLen + padding;
+    const header = new Uint8Array(10);
+    header.set(latin1Bytes('ID3'));
+    header[3] = version;
+    header[6] = (tagSize >>> 21) & 0x7F; header[7] = (tagSize >>> 14) & 0x7F;
+    header[8] = (tagSize >>> 7)  & 0x7F; header[9] = tagSize & 0x7F;
+    const out = new Uint8Array(10 + tagSize + (mp3Bytes.length - audioStart));
+    out.set(header, 0);
+    out.set(oldFrames, 10);
+    let o = 10 + oldFrames.length;
+    for (const f of newFrames) { out.set(f, o); o += f.length; }
+    out.set(mp3Bytes.slice(audioStart), 10 + tagSize);
+    return out;
+  }
+
+  async function embedId3AndDownload() {
+    if (!currentHash || !dropZone._file) return;
+    const file  = dropZone._file;
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const fields = [
+      ['haawke_sha256', currentHash],
+      ['haawke_author', getAuthor()],
+      ['haawke_verify_url', `https://verify.haawke.com/#${currentHash}`]
+    ];
+    if (getOrg())   fields.push(['haawke_org', getOrg()]);
+    if (getOrcid()) fields.push(['haawke_orcid', getOrcid()]);
+    const result = writeId3Provenance(bytes, fields);
+    const dot  = file.name.lastIndexOf('.');
+    const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const ext  = dot > 0 ? file.name.slice(dot) : '.mp3';
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(new Blob([result], { type: 'audio/mpeg' }));
+    a.download = `${base}_provenance${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // LICENSE / TIER
+  const LICENSE_ENDPOINT = 'https://haawke-license.haawkeai.workers.dev/validate-key';
+  const FREE_MONTHLY_LIMIT = 50;
+
+  function getTier() { return localStorage.getItem('haawke-tier') || 'free'; }
+  function isPro()   { const t = getTier(); return t === 'pro' || t === 'studio'; }
+
+  function renderTierBadge() {
+    const badge = document.getElementById('tierBadge');
+    const t = getTier();
+    badge.textContent = t === 'studio' ? 'Studio' : t === 'pro' ? 'Creator Pro' : 'Free';
+    badge.className = 'tier-badge' + (isPro() ? ' pro' : '');
+  }
+
+  async function applyLicenseKey() {
+    const key    = document.getElementById('licenseKeyInput').value.trim();
+    const status = document.getElementById('licenseStatus');
+    status.style.display = 'block';
+    if (!key) {
+      localStorage.removeItem('haawke-license-key');
+      localStorage.setItem('haawke-tier', 'free');
+      status.textContent = 'License cleared — Free tier active.';
+      renderTierBadge(); renderTplGrid();
+      return;
+    }
+    status.textContent = 'Validating key…';
+    try {
+      const res  = await fetch(`${LICENSE_ENDPOINT}?key=${encodeURIComponent(key)}`);
+      const data = await res.json();
+      if (data.valid) {
+        localStorage.setItem('haawke-license-key', key);
+        localStorage.setItem('haawke-tier', data.tier === 'studio' ? 'studio' : 'pro');
+        status.textContent = `✓ License valid — ${data.tier === 'studio' ? 'Studio' : 'Creator Pro'} unlocked.`;
+      } else {
+        localStorage.setItem('haawke-tier', 'free');
+        status.textContent = 'Key not recognized. Check the key from your purchase email.';
+      }
+    } catch (e) {
+      status.textContent = 'Could not reach the license server — try again shortly.';
+    }
+    renderTierBadge(); renderTplGrid();
+  }
+
+  function monthKey() { return `haawke-hash-count-${new Date().toISOString().slice(0, 7)}`; }
+  function bumpHashCounter() {
+    if (isPro()) return;
+    const k = monthKey();
+    const n = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
+    localStorage.setItem(k, String(n));
+    if (n > FREE_MONTHLY_LIMIT) {
+      showUpgradeNote(`You've generated ${n} hashes this month — the Free tier includes ${FREE_MONTHLY_LIMIT}/month. Creator Pro adds unlimited hashing and all five certificate templates.`);
+    }
+  }
+
+  function showUpgradeNote(msg) {
+    const el = document.getElementById('upgradeNote');
+    el.style.display = 'block';
+    el.innerHTML = `${msg} <a href="https://haawke.com" target="_blank" rel="noopener">Upgrade →</a>`;
+  }
+
+  // CERTIFICATE TEMPLATES
+  const CERT_TEMPLATES = [
+    { id: 1, name: 'Circuit', tier: 'free',
+      swatch: "background:#fff;background-image:linear-gradient(rgba(42,31,14,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(42,31,14,.2) 1px,transparent 1px);background-size:7px 7px",
+      pageCss: "background:#ffffff;background-image:linear-gradient(rgba(42,31,14,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(42,31,14,.05) 1px,transparent 1px);background-size:6mm 6mm",
+      deco: '<div style="position:absolute;inset:9mm;border:.5px solid rgba(42,31,14,.45);pointer-events:none"></div><div style="position:absolute;inset:10.4mm;border:.3px solid rgba(42,31,14,.22);pointer-events:none"></div>' },
+    { id: 2, name: 'Bitcoin', tier: 'pro',
+      swatch: "background:#f4f5f7 url('./images/hash-template-2.webp') center/cover",
+      pageCss: "background:#f4f5f7 url('https://hash.haawke.com/images/hash-template-2.webp') center/cover no-repeat",
+      deco: '<div style="position:absolute;inset:9mm;border:.5px solid rgba(90,95,105,.45);pointer-events:none"></div>' },
+    { id: 3, name: 'Silver', tier: 'pro',
+      swatch: "background:#d9d9de url('./images/hash-template-1.webp') center/cover",
+      pageCss: "background:#e9e8ea url('https://hash.haawke.com/images/hash-template-1.webp') center/100% 100% no-repeat",
+      deco: '' },
+    { id: 4, name: 'Gold', tier: 'pro',
+      swatch: "background:#f5f0e8 url('./images/hash-template-3.webp') center/cover",
+      pageCss: "background:#f5f0e8 url('https://hash.haawke.com/images/hash-template-3.webp') center/100% 100% no-repeat",
+      deco: '' },
+    { id: 5, name: 'Parchment', tier: 'pro',
+      swatch: "background:radial-gradient(ellipse at center,#f6ecd2 0%,#e6d2a4 70%,#d4ba82 100%);border-color:#8b6914",
+      pageCss: "background:radial-gradient(ellipse at center,#f6ecd2 0%,#ecd9ae 65%,#dcc28c 100%)",
+      deco: '<div style="position:absolute;inset:7mm;border:1.2mm double #8b6914;pointer-events:none"></div><div style="position:absolute;inset:10.5mm;border:.4mm solid rgba(139,105,20,.55);pointer-events:none"></div><div style="position:absolute;inset:11.8mm;border:.2mm solid rgba(139,105,20,.35);pointer-events:none"></div><div style="position:absolute;top:12mm;left:13mm;font-size:14pt;color:#8b6914">❦</div><div style="position:absolute;top:12mm;right:13mm;font-size:14pt;color:#8b6914;transform:scaleX(-1)">❦</div><div style="position:absolute;bottom:12mm;left:13mm;font-size:14pt;color:#8b6914;transform:scaleY(-1)">❦</div><div style="position:absolute;bottom:12mm;right:13mm;font-size:14pt;color:#8b6914;transform:scale(-1)">❦</div>' }
+  ];
+
+  function getSelectedTemplate() {
+    const id  = parseInt(localStorage.getItem('haawke-cert-template') || '1', 10);
+    const tpl = CERT_TEMPLATES.find(t => t.id === id) || CERT_TEMPLATES[0];
+    return (tpl.tier === 'pro' && !isPro()) ? CERT_TEMPLATES[0] : tpl;
+  }
+
+  function selectTemplate(id) {
+    const tpl = CERT_TEMPLATES.find(t => t.id === id);
+    if (!tpl) return;
+    if (tpl.tier === 'pro' && !isPro()) {
+      showUpgradeNote(`The “${tpl.name}” template is part of Creator Pro — the Free tier includes the Circuit template. Enter a license key under Author Details to unlock all five.`);
+      return;
+    }
+    localStorage.setItem('haawke-cert-template', String(id));
+    renderTplGrid();
+  }
+
+  function renderTplGrid() {
+    const grid = document.getElementById('tplGrid');
+    if (!grid) return;
+    const sel = getSelectedTemplate();
+    grid.innerHTML = CERT_TEMPLATES.map(t => {
+      const locked = t.tier === 'pro' && !isPro();
+      return `<div class="tpl-card${t.id === sel.id ? ' selected' : ''}${locked ? ' locked' : ''}" onclick="selectTemplate(${t.id})" title="${t.name}${locked ? ' — Creator Pro' : ''}">
+        ${locked ? '<span class="tpl-lock">🔒</span>' : ''}
+        <div class="tpl-swatch" style="${t.swatch}"></div>
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-tier">${t.tier === 'free' ? 'Free' : 'Creator Pro'}</div>
+      </div>`;
+    }).join('');
+  }
+
   // QR CODE
   function getQrCanvas(url, size) {
     return new Promise(resolve => {
@@ -1640,6 +2100,7 @@ It cannot have been altered after the registered date.`;
     const year       = new Date(meta.ts || Date.now()).getFullYear();
     const safeName   = (meta.name || 'file').replace(/[^a-z0-9]/gi, '_').toLowerCase().replace(/_+/g, '_').replace(/^_|_$/g, '');
     const certTitle  = `haawke_cert_${safeName}_${hash.slice(0, 8)}_${Date.now()}`;
+    const tpl        = getSelectedTemplate();
 
     const authorRow = author ? `<div class="row"><div class="lbl">Author</div><div class="val">${escapeXml(author)}</div></div>` : '';
     const orgRow    = org    ? `<div class="row"><div class="lbl">Organization</div><div class="val">${escapeXml(org)}</div></div>` : '';
@@ -1655,7 +2116,7 @@ It cannot have been altered after the registered date.`;
   @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Space+Mono:wght@400;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:210mm;height:297mm;background:#f5f0e8}
-  .page{width:210mm;height:297mm;padding:38mm 30mm 32mm 30mm;display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;color:#2a1f0e;position:relative;background:url('https://hash.haawke.com/images/hash-template-3.webp') center/cover no-repeat}
+  .page{width:210mm;height:297mm;padding:38mm 30mm 32mm 30mm;display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;color:#2a1f0e;position:relative;${tpl.pageCss}}
   .eyebrow{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:#8b6914;text-align:center;margin-bottom:4mm}
   h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:24pt;text-align:center;color:#2a1f0e;margin-bottom:1.5mm;letter-spacing:.02em}
   h1 em{font-style:italic;color:#6b4f1a}
@@ -1680,6 +2141,7 @@ It cannot have been altered after the registered date.`;
 </head>
 <body>
 <div class="page">
+  ${tpl.deco}
   <div class="eyebrow">Haawke Neural Technology &nbsp;&middot;&nbsp; Public Provenance Registry</div>
   <h1>Provenance <em>Certificate</em></h1>
   <div class="sub">Cryptographic Record of Authorship</div>
@@ -1704,6 +2166,7 @@ It cannot have been altered after the registered date.`;
   </div>
   <div class="footer">
     This certificate records the cryptographic hash of the above work at time of registration.<br>
+    Registered to Bitcoin blockchain via OpenTimestamps &nbsp;&middot;&nbsp; U.S. Copyright Registration 1-15179233921<br>
     Verify authenticity at verify.haawke.com &nbsp;&middot;&nbsp; Haawke Hash &mdash; Provenance Tool &nbsp;&middot;&nbsp; ${year}
   </div>
 </div>
@@ -1727,6 +2190,9 @@ It cannot have been altered after the registered date.`;
   renderLog();
   loadAuthorPrefs();
   renderChainViewer();
+  renderTierBadge();
+  renderTplGrid();
+  initOpfsLog();
   document.getElementById('sessionDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('sessionParticipants').value = getAuthor();
 </script>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Creator Pro — Haawke Hash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080e1a; --surface: #0d1e38; --border: rgba(80,160,255,0.35);
+    --gold: #c9a84c; --blue: #4fa8e8; --cream: #f0ead8; --dim: rgba(240,234,216,0.75);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); min-height: 100vh;
+    font-family: "Bruno Ace SC", sans-serif; color: var(--cream);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 60px 20px 80px;
+  }
+  .container { width: 100%; max-width: 640px; }
+  .panel {
+    background: rgba(13,30,56,0.92); border: 1px solid var(--border);
+    padding: 36px 36px 32px; position: relative;
+  }
+  .panel::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5;
+  }
+  .eyebrow {
+    font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 18px;
+  }
+  h1 { font-weight: 300; font-size: clamp(24px, 5vw, 34px); margin-bottom: 18px; line-height: 1.25; }
+  h1 span { color: var(--gold); }
+  p { font-size: 16px; line-height: 1.9; color: var(--dim); margin-bottom: 16px; }
+  ol { margin: 0 0 20px 20px; font-size: 15px; line-height: 2; color: var(--dim); }
+  ol strong { color: var(--cream); font-weight: 400; }
+  .btn {
+    display: inline-block; background: transparent; border: 1px solid var(--gold);
+    color: var(--gold); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 14px 28px; cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .btn:hover { background: rgba(201,168,76,0.1); box-shadow: 0 0 20px rgba(201,168,76,0.2); }
+  footer { margin-top: 40px; font-size: 13px; letter-spacing: 0.1em; color: var(--dim); text-align: center; line-height: 2; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <div class="eyebrow">Haawke Hash · Creator Pro</div>
+    <h1>Payment received — <span>welcome aboard</span></h1>
+    <p>Your license key has been emailed to you. It usually arrives within a minute or two — check your spam folder if it doesn't appear.</p>
+    <ol>
+      <li>Open <strong>hash.haawke.com</strong></li>
+      <li>Expand <strong>Author Details</strong></li>
+      <li>Paste your key into the <strong>License</strong> field and press <strong>Apply</strong></li>
+    </ol>
+    <p>That unlocks all five certificate templates, unlimited hashing, and embedded EXIF / ID3 provenance on this device.</p>
+    <a class="btn" href="https://hash.haawke.com">Open Haawke Hash →</a>
+  </div>
+  <footer>
+    Haawke Neural Technology · Craig Ellenwood × Claude (Anthropic)<br>
+    Questions? Reply to your receipt email.
+  </footer>
+</div>
+</body>
+</html>
