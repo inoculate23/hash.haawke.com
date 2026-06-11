@@ -1,5 +1,5 @@
 # Haawke Hash
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/99ed7570-9401-4a42-baa7-5efd07072e9a/deploy-status)](https://app.netlify.com/projects/sparkly-klepon-d68ebe/deploys)
 **Cryptographic provenance tool for human-AI collaborative works.**
 
 Live: [hash.haawke.com](https://hash.haawke.com)  
