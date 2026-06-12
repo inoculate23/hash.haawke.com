@@ -186,7 +186,7 @@ async function handleRegister(request, env) {
       ots_status: 'pending',
       bitcoin_block: null,
       registered: new Date().toISOString(),
-      tool: 'Haawke Hash v1.0',
+      tool: 'Haawke Hash v1.3',
       registry: 'https://verify.haawke.com',
     };
 
