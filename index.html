@@ -2157,7 +2157,7 @@ It cannot have been altered after the registered date.`;
         <div class="val hash-abbr">${escapeXml(shortHash)}</div>
         <div class="hash-full">${escapeXml(hash)}</div>
       </div>
-      <div class="row" style="margin-top:2mm"><div class="lbl">Verify at</div><div class="val verify-url">${escapeXml(verifyUrl)}</div></div>
+      <div class="row" style="margin-top:2mm"><div class="lbl">Verify at</div><div class="val verify-url"><a href="${escapeXml(verifyUrl)}" target="_blank" rel="noopener">${escapeXml(verifyUrl)}</a></div></div>
     </div>
     <div class="qr-col">
       <div class="qr-box" id="certQr"></div>
