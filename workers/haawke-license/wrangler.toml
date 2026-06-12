@@ -1,0 +1,15 @@
+name = "haawke-license"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+kv_namespaces = [
+  { binding = "HAAWKE_LICENSES", id = "7ed83b355ec5452584d6b5e2d0d929c8" },
+  { binding = "HAAWKE_EMAILS", id = "6fb1b4bf4a4047e7a947e8be65b81b37" }
+]
+
+# Secrets (set via `wrangler secret put <NAME>`):
+#   STRIPE_SECRET_KEY     — Stripe secret key (sk_test_... / sk_live_...)
+#   STRIPE_WEBHOOK_SECRET — from Stripe webhook endpoint settings (whsec_...)
+#   RESEND_API_KEY        — from resend.com (re_...)
+#   ADMIN_KEY             — random UUID for /lookup-email auth

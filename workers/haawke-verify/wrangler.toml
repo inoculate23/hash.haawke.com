@@ -1,0 +1,8 @@
+name = "haawke-verify"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+kv_namespaces = [
+  { binding = "PROVENANCE", id = "61c3afcf84844c3cbe7969ea88b9fbb3" }
+]

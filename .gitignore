@@ -25,3 +25,6 @@ wrangler.toml
 .cursor/
 *.swp
 *.swo
+
+# worker configs contain no secrets — keep them in the repo
+!workers/*/wrangler.toml
