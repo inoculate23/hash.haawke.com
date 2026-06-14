@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcome to Creator Pro — Haawke Hash</title>
+<title>Welcome to Haawke Hash — Payment Received</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -37,33 +37,81 @@
   p { font-size: 16px; line-height: 1.9; color: var(--dim); margin-bottom: 16px; }
   ol { margin: 0 0 20px 20px; font-size: 15px; line-height: 2; color: var(--dim); }
   ol strong { color: var(--cream); font-weight: 400; }
+  .steps-pro { display: block; }
+  .steps-studio { display: none; }
+  .tier-studio .steps-pro { display: none; }
+  .tier-studio .steps-studio { display: block; }
+  .tier-studio .eyebrow { color: var(--blue); border-color: var(--blue); }
+  .tier-studio .panel { border-color: rgba(79,168,232,0.45); }
   .btn {
     display: inline-block; background: transparent; border: 1px solid var(--gold);
     color: var(--gold); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
     padding: 14px 28px; cursor: pointer; text-decoration: none; transition: all 0.2s;
+    margin-right: 12px; margin-top: 8px;
   }
   .btn:hover { background: rgba(201,168,76,0.1); box-shadow: 0 0 20px rgba(201,168,76,0.2); }
+  .notice {
+    margin-top: 20px; padding: 14px 18px;
+    background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.25);
+    font-size: 14px; color: var(--dim); line-height: 1.7;
+  }
   footer { margin-top: 40px; font-size: 13px; letter-spacing: 0.1em; color: var(--dim); text-align: center; line-height: 2; }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="root">
   <div class="panel">
-    <div class="eyebrow">Haawke Hash · Creator Pro</div>
+    <div class="eyebrow" id="tier-label">Haawke Hash · Creator Pro</div>
     <h1>Payment received — <span>welcome aboard</span></h1>
     <p>Your license key has been emailed to you. It usually arrives within a minute or two — check your spam folder if it doesn't appear.</p>
-    <ol>
-      <li>Open <strong>hash.haawke.com</strong></li>
-      <li>Expand <strong>Author Details</strong></li>
-      <li>Paste your key into the <strong>License</strong> field and press <strong>Apply</strong></li>
-    </ol>
-    <p>That unlocks all five certificate templates, unlimited hashing, and embedded EXIF / ID3 provenance on this device.</p>
+
+    <div class="steps-pro">
+      <ol>
+        <li>Open <strong>hash.haawke.com</strong></li>
+        <li>Expand <strong>Author Details</strong></li>
+        <li>Paste your key into the <strong>License</strong> field and press <strong>Apply</strong></li>
+      </ol>
+      <p>That unlocks all five certificate templates, unlimited hashing, and embedded EXIF / ID3 provenance on this device.</p>
+    </div>
+
+    <div class="steps-studio">
+      <ol>
+        <li>Open <strong>hash.haawke.com</strong></li>
+        <li>Expand <strong>Author Details</strong></li>
+        <li>Paste your key into the <strong>License</strong> field and press <strong>Apply</strong></li>
+        <li>Forward the key to up to <strong>4 additional team members</strong> — each installs it the same way</li>
+      </ol>
+      <p>Studio unlocks everything in Creator Pro plus 5 team seats, shared team database, API access (5K calls/month), and white-label certificates.</p>
+    </div>
+
+    <div class="notice" id="no-email-notice" style="display:none">
+      <strong>No email after a few minutes?</strong> Email <a href="mailto:craig@haawke.com" style="color:var(--gold)">craig@haawke.com</a> with your payment receipt and we'll send your key directly.
+    </div>
+
     <a class="btn" href="https://hash.haawke.com">Open Haawke Hash →</a>
+    <a class="btn" href="https://verify.haawke.com" style="border-color:rgba(80,160,255,0.5);color:var(--blue)">Verify a File →</a>
   </div>
   <footer>
     Haawke Neural Technology · Craig Ellenwood × Claude (Anthropic)<br>
-    Questions? Reply to your receipt email.
+    Questions? Reply to your receipt email or contact <a href="mailto:craig@haawke.com" style="color:var(--gold)">craig@haawke.com</a>
   </footer>
 </div>
+<script>
+  // Read ?tier=studio from Stripe redirect URL (set via payment link metadata if needed)
+  // or detect from URL param passed by payment link's client_reference_id / metadata
+  const params = new URLSearchParams(location.search);
+  const tier = (params.get('tier') || '').toLowerCase();
+
+  if (tier === 'studio') {
+    document.getElementById('root').classList.add('tier-studio');
+    document.getElementById('tier-label').textContent = 'Haawke Hash · Studio';
+    document.title = 'Welcome to Studio — Haawke Hash';
+  }
+
+  // Show "no email?" notice after 3 minutes
+  setTimeout(() => {
+    document.getElementById('no-email-notice').style.display = 'block';
+  }, 3 * 60 * 1000);
+</script>
 </body>
 </html>
