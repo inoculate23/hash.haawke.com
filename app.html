@@ -789,7 +789,7 @@ background-image: url("./images/background.jpg") ;
           <div class="session-field" style="flex:1">
             <label class="session-label" for="sessionParticipants">Participants</label>
             <input type="text" id="sessionParticipants"
-              placeholder="Craig Ellenwood × Claude (Anthropic)">
+              placeholder="e.g. Alice Smith, Bob Jones">
           </div>
         </div>
         <div class="session-field">
@@ -837,11 +837,11 @@ background-image: url("./images/background.jpg") ;
       <div id="authorFields" style="display:none">
         <div class="author-fields">
           <span class="author-field-label">Author</span>
-          <input type="text" id="inputAuthor" placeholder="Author name(s)" value="Craig Ellenwood × Claude (Anthropic)" onchange="saveAuthorPrefs()">
+          <input type="text" id="inputAuthor" placeholder="Author name(s)" onchange="saveAuthorPrefs()">
           <span class="author-field-label">Org</span>
-          <input type="text" id="inputOrg" placeholder="Organization" value="Haawke Neural Technology" onchange="saveAuthorPrefs()">
+          <input type="text" id="inputOrg" placeholder="Organization" onchange="saveAuthorPrefs()">
           <span class="author-field-label">ORCID</span>
-          <input type="text" id="inputOrcid" placeholder="ORCID iD (e.g. 0009-0001-6475-5109)" value="0009-0001-6475-5109" onchange="saveAuthorPrefs()">
+          <input type="text" id="inputOrcid" placeholder="ORCID iD (e.g. 0009-0001-6475-5109)" onchange="saveAuthorPrefs()">
         </div>
         <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;letter-spacing:0.12em;color:var(--dim);cursor:pointer;text-transform:uppercase">
           <input type="checkbox" id="saveDefaultsChk" checked onchange="saveAuthorPrefs()" style="accent-color:#c9a84c">
