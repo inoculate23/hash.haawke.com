@@ -15,6 +15,12 @@ const PRICE_TIERS = {
   'price_1Ti5P3Gl715hGhcRDEWKjMSx': 'studio',  // Studio Annual $399 (live)
 };
 
+// Fallback: any price on these products maps to the tier — handles future prices
+const PRODUCT_TIERS = {
+  'prod_UhUNKrQqoSxFOE': 'pro',    // Haawke Creator Pro (live)
+  'prod_UhUNSElzOzhlRA': 'studio',  // Haawke Studio (live)
+};
+
 const TIER_NAMES = { pro: 'Creator Pro', studio: 'Studio' };
 
 const TIER_FEATURES = {
@@ -165,7 +171,9 @@ async function handleCheckoutCompleted(session, env) {
   let tier = null;
   for (const item of lineItems.data || []) {
     const priceId = item.price?.id;
-    if (PRICE_TIERS[priceId]) { tier = PRICE_TIERS[priceId]; break; }
+    const productId = item.price?.product;
+    tier = PRICE_TIERS[priceId] || PRODUCT_TIERS[productId] || null;
+    if (tier) break;
   }
   if (!tier) throw new Error('No recognized price in checkout session');
 
