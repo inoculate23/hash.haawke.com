@@ -1093,6 +1093,29 @@
       });
     });
 
+    // Contact form — submit via fetch so page doesn't navigate away
+    const contactForm = document.querySelector('form[name="contact"]');
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = contactForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          await fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(new FormData(contactForm)).toString(),
+          });
+          contactForm.innerHTML = '<p style="color:var(--gold);font-size:16px;letter-spacing:0.08em;line-height:2;text-align:center;">Message sent — we\'ll be in touch.</p>';
+        } catch {
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+          alert('Something went wrong. Please email craig@haawke.com directly.');
+        }
+      });
+    }
+
     // Navbar scroll shadow
     const navbar = document.querySelector('.navbar');
     window.addEventListener('scroll', () => {
