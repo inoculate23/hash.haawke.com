@@ -5,6 +5,7 @@
 // POST /webhook                 — Stripe webhook (checkout.session.completed,
 //                                 customer.subscription.deleted)
 // GET  /validate-key?key=KEY    — license validation for hash.haawke.com
+// GET  /resend-key?email=E      — self-service key recovery (rate-limited, always 200)
 // GET  /lookup-email?email=E    — admin lookup (X-Admin-Key header)
 
 const PRICE_TIERS = {
@@ -71,6 +72,9 @@ export default {
     }
     if (url.pathname === '/validate-key' && request.method === 'GET') {
       return handleValidateKey(url, env, request);
+    }
+    if (url.pathname === '/resend-key' && request.method === 'GET') {
+      return handleResendKey(url, env, request);
     }
     if (url.pathname === '/lookup-email' && request.method === 'GET') {
       return handleLookupEmail(url, env, request);
@@ -274,6 +278,38 @@ async function handleValidateKey(url, env, request) {
   }
 
   return json({ valid: true, tier: license.tier, email: license.email }, 200, cors);
+}
+
+// ---------------------------------------------------------------------------
+// Self-service key recovery
+// ---------------------------------------------------------------------------
+
+async function handleResendKey(url, env, request) {
+  const cors = corsHeaders(request);
+  const email = (url.searchParams.get('email') || '').toLowerCase().trim();
+
+  if (email?.includes('@')) {
+    const cooldownKey = `__cooldown__${email}`;
+    const onCooldown = await env.HAAWKE_EMAILS.get(cooldownKey);
+
+    if (!onCooldown) {
+      const licenseKey = await env.HAAWKE_EMAILS.get(email);
+      if (licenseKey) {
+        const raw = await env.HAAWKE_LICENSES.get(licenseKey);
+        if (raw) {
+          const license = JSON.parse(raw);
+          if (license.active) {
+            // Set cooldown before sending to prevent races
+            await env.HAAWKE_EMAILS.put(cooldownKey, '1', { expirationTtl: 300 });
+            await sendLicenseEmail(license.email, licenseKey, license.tier, env);
+          }
+        }
+      }
+    }
+  }
+
+  // Always return the same response — never reveal whether email exists
+  return json({ sent: true, message: "If that email has a license, we've sent it." }, 200, cors);
 }
 
 // ---------------------------------------------------------------------------
