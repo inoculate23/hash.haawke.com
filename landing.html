@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haawke Hash — Cryptographic Provenance for the Bitcoin Age</title>
+  <meta name="description" content="Prove any file existed at a specific moment in time. SHA-256 hashing anchored to the Bitcoin blockchain. Free. No upload. No account required.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0c0a08;
+      --gold:    #c9a84c;
+      --gold-dim: rgba(201,168,76,0.55);
+      --cream:   #f5f0e8;
+      --dim:     rgba(245,240,232,0.72);
+      --dimmer:  rgba(245,240,232,0.45);
+      --rust:    #8b3a2a;
+      --ink:     #1a1612;
+      --border:  rgba(201,168,76,0.22);
+      --surface: rgba(26,22,18,0.72);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { color: var(--cream); }
+
+    /* ── NAVBAR ─────────────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(12,10,8,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      height: 56px;
+      gap: 0 28px;
+    }
+
+    .nav-brand {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-right: auto;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav-brand:hover { color: var(--cream); }
+
+    .nav-link {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .nav-link:hover { color: var(--gold); border-bottom-color: var(--gold-dim); }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 16px; gap: 0 16px; height: auto; flex-wrap: wrap; padding: 10px 16px; position: relative; }
+      .nav-brand { width: 100%; margin-bottom: 6px; }
+      .nav-link { font-size: 10px; }
+    }
+
+    /* ── HERO ────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('landing-page/images/background.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(12,10,8,0.60);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .sigil {
+      display: block;
+      margin: 0 auto 36px;
+      width: 64px;
+      height: 64px;
+    }
+
+    .hero-headline {
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      line-height: 1.05;
+      color: var(--cream);
+      margin-bottom: 24px;
+    }
+
+    .hero-sub {
+      font-size: clamp(18px, 2.5vw, 22px);
+      font-weight: 300;
+      color: var(--dim);
+      max-width: 560px;
+      margin: 0 auto 44px;
+      line-height: 1.6;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 14px 32px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: rgba(201,168,76,0.10);
+      box-shadow: 0 0 24px rgba(201,168,76,0.18);
+      color: var(--cream);
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--ink);
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+    .btn-primary:hover {
+      background: var(--cream);
+      border-color: var(--cream);
+      color: var(--ink);
+      box-shadow: 0 0 32px rgba(201,168,76,0.3);
+    }
+
+    .btn-large {
+      font-size: 14px;
+      padding: 18px 40px;
+    }
+
+    /* ── SECTIONS ────────────────────────────────────────────── */
+    section {
+      padding: 96px 24px;
+    }
+
+    .section-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .section-heading {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 300;
+      letter-spacing: 0.01em;
+      color: var(--cream);
+      margin-bottom: 20px;
+      line-height: 1.15;
+    }
+
+    .section-intro {
+      font-size: 18px;
+      color: var(--dim);
+      max-width: 640px;
+      margin-bottom: 64px;
+      line-height: 1.7;
+    }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: var(--gold-dim);
+      margin: 0 auto 20px;
+    }
+
+    /* ── WHAT IT DOES ────────────────────────────────────────── */
+    .what-section {
+      background: rgba(26,22,18,0.55);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+    }
+
+    @media (max-width: 768px) {
+      .pillars { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    .pillar-icon {
+      font-size: 32px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .pillar-title {
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--gold);
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .pillar-body {
+      font-size: 17px;
+      color: var(--dim);
+      line-height: 1.75;
+    }
+
+    /* ── USE CASES ───────────────────────────────────────────── */
+    .use-cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .use-cases-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .use-cases-grid { grid-template-columns: 1fr; }
+    }
+
+    .use-card {
+      background: rgba(26,22,18,0.7);
+      border: 1px solid var(--border);
+      padding: 28px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .use-card:hover {
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 32px rgba(201,168,76,0.08);
+    }
+
+    .use-card-industry {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .use-card-body {
+      font-size: 16px;
+      color: var(--dim);
+      line-height: 1.7;
+    }
+
+    /* ── MEMORY CHAIN ────────────────────────────────────────── */
+    .memory-section {
+      background: rgba(12,10,8,0.80);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .memory-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 60% 50%, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .memory-grid { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    .memory-body {
+      font-size: 18px;
+      color: var(--dim);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .memory-chain-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .chain-link {
+      background: rgba(26,22,18,0.9);
+      border: 1px solid var(--border);
+      padding: 18px 22px;
+      position: relative;
+    }
+
+    .chain-link + .chain-link {
+      border-top: none;
+    }
+
+    .chain-link::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      bottom: -12px;
+      width: 1px;
+      height: 12px;
+      background: var(--gold-dim);
+    }
+
+    .chain-link:last-child::before { display: none; }
+
+    .chain-link-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .chain-link-hash {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      color: var(--dimmer);
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .chain-link-hash em {
+      color: var(--gold);
+      font-style: normal;
+    }
+
+    /* ── SKILLS CARD ─────────────────────────────────────────── */
+    .skills-card {
+      background: rgba(26,22,18,0.85);
+      border: 1px solid var(--gold-dim);
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 48px;
+      text-align: center;
+      box-shadow: 0 0 64px rgba(201,168,76,0.07);
+    }
+
+    .skills-card-title {
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .skills-card-body {
+      font-size: 18px;
+      color: var(--dim);
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+
+    .skills-steps {
+      text-align: left;
+      margin: 28px 0 36px;
+      counter-reset: steps;
+    }
+
+    .skills-step {
+      display: flex;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+      font-size: 17px;
+      color: var(--dim);
+      align-items: flex-start;
+      counter-increment: steps;
+    }
+
+    .skills-step:last-child { border-bottom: none; }
+
+    .step-num {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      min-width: 28px;
+      padding-top: 3px;
+    }
+
+    .skills-note {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      color: var(--dimmer);
+      margin-top: 20px;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── FAQ ─────────────────────────────────────────────────── */
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-question {
+      width: 100%;
+      background: transparent;
+      border: none;
+      text-align: left;
+      padding: 24px 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--cream);
+      transition: color 0.2s;
+    }
+
+    .faq-question:hover { color: var(--gold); }
+
+    .faq-arrow {
+      font-family: 'Courier Prime', monospace;
+      font-size: 16px;
+      color: var(--gold);
+      transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .faq-arrow { transform: rotate(45deg); }
+
+    .faq-answer {
+      display: none;
+      padding: 0 0 28px;
+      font-size: 17px;
+      color: var(--dim);
+      line-height: 1.8;
+      max-width: 640px;
+    }
+
+    .faq-item.open .faq-answer { display: block; }
+
+    /* ── PRICING ─────────────────────────────────────────────── */
+    .pricing-section {
+      background: rgba(26,22,18,0.55);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; }
+    }
+
+    .price-card {
+      background: rgba(12,10,8,0.7);
+      border: 1px solid var(--border);
+      padding: 36px 28px;
+    }
+
+    .price-card.featured {
+      border-color: var(--gold);
+      box-shadow: 0 0 48px rgba(201,168,76,0.10);
+      position: relative;
+    }
+
+    .price-card-badge {
+      position: absolute;
+      top: -1px; right: 24px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--ink);
+      padding: 4px 10px;
+      font-weight: 700;
+    }
+
+    .price-tier {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .price-amount {
+      font-size: 48px;
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .price-period {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      color: var(--dimmer);
+      letter-spacing: 0.1em;
+      margin-bottom: 28px;
+      display: block;
+    }
+
+    .price-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .price-features li {
+      font-size: 16px;
+      color: var(--dim);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(245,240,232,0.07);
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .price-features li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--gold-dim);
+      font-family: 'Courier Prime', monospace;
+    }
+
+    .price-ctas {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .price-ctas .btn { text-align: center; font-size: 11px; padding: 12px 20px; }
+
+    /* ── CONTACT ─────────────────────────────────────────────── */
+    .contact-form {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      background: rgba(26,22,18,0.8);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      padding: 14px 18px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 160px;
+      line-height: 1.6;
+    }
+
+    .form-submit {
+      width: 100%;
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 16px;
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: var(--ink);
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .form-submit:hover {
+      background: var(--cream);
+      border-color: var(--cream);
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 32px;
+      background: rgba(12,10,8,0.9);
+    }
+
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .footer-inner { grid-template-columns: 1fr; gap: 24px; text-align: center; }
+    }
+
+    .footer-col p, .footer-col a {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--dimmer);
+      line-height: 2;
+      display: block;
+      text-decoration: none;
+    }
+
+    .footer-col a:hover { color: var(--gold); }
+
+    .footer-copyright {
+      max-width: 1080px;
+      margin: 32px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid rgba(201,168,76,0.10);
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--dimmer);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a class="nav-brand" href="https://haawke.com">Haawke</a>
+    <a class="nav-link" href="https://hash.haawke.com">Hash</a>
+    <a class="nav-link" href="https://verify.haawke.com">Verify</a>
+    <a class="nav-link" href="https://haawke.com/research/haawke-research">Research</a>
+    <a class="nav-link" href="https://zenodo.org/records/20575177" target="_blank" rel="noopener">Paper ↗</a>
+    <a class="nav-link" href="#faq">FAQ</a>
+    <a class="nav-link" href="#contact">Contact</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="hero-content">
+      <svg class="sigil" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <polygon points="32,4 60,32 32,60 4,32" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
+        <polygon points="32,14 50,32 32,50 14,32" fill="none" stroke="#c9a84c" stroke-width="0.75" opacity="0.5"/>
+        <line x1="32" y1="4" x2="32" y2="60" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+        <line x1="4" y1="32" x2="60" y2="32" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+        <circle cx="32" cy="32" r="3" fill="#c9a84c" opacity="0.9"/>
+      </svg>
+      <h1 class="hero-headline">Prove It Existed.</h1>
+      <p class="hero-sub">Cryptographic provenance for your files — anchored to the Bitcoin blockchain. Free. No upload. No account required.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="https://hash.haawke.com">Hash a File</a>
+        <a class="btn" href="https://verify.haawke.com">Verify a File</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT IT DOES -->
+  <section class="what-section" aria-labelledby="what-heading">
+    <div class="section-inner">
+      <span class="section-label">What It Does</span>
+      <h2 class="section-heading" id="what-heading">What Is Haawke Hash?</h2>
+      <div class="pillars">
+        <div class="pillar">
+          <span class="pillar-icon" aria-hidden="true">⬡</span>
+          <h3 class="pillar-title">Your File Stays Private</h3>
+          <p class="pillar-body">Nothing is uploaded. Your file never leaves your device. We compute a mathematical fingerprint — called a SHA-256 hash — entirely in your browser.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-icon" aria-hidden="true">₿</span>
+          <h3 class="pillar-title">Anchored to Bitcoin</h3>
+          <p class="pillar-body">Your fingerprint is submitted to the Bitcoin blockchain via OpenTimestamps. Bitcoin has never gone down. Your timestamp will outlast any company, including us.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-icon" aria-hidden="true">✦</span>
+          <h3 class="pillar-title">Anyone Can Verify</h3>
+          <p class="pillar-body">Share a link. Anyone can check verify.haawke.com to confirm your file existed at that exact date and has not been changed since. No account needed to verify.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section aria-labelledby="usecases-heading">
+    <div class="section-inner">
+      <span class="section-label">Use Cases</span>
+      <h2 class="section-heading" id="usecases-heading">Who Uses It</h2>
+      <p class="section-intro">Cryptographic provenance applies anywhere the sequence of creation matters — in law, in art, in science, in code.</p>
+      <div class="use-cases-grid">
+        <div class="use-card">
+          <span class="use-card-industry">Photographers</span>
+          <p class="use-card-body">Hash your photos before submitting to publications. Prove you took the shot before it was published anywhere.</p>
+        </div>
+        <div class="use-card">
+          <span class="use-card-industry">Musicians</span>
+          <p class="use-card-body">Hash your demos and masters before release. If someone claims your melody first, your Bitcoin timestamp says otherwise.</p>
+        </div>
+        <div class="use-card">
+          <span class="use-card-industry">Writers &amp; Journalists</span>
+          <p class="use-card-body">Hash your drafts and source documents. Prove what you wrote and when — before the story runs.</p>
+        </div>
+        <div class="use-card">
+          <span class="use-card-industry">Legal &amp; Contracts</span>
+          <p class="use-card-body">Hash contracts before signing. Create an immutable record of what each party agreed to at what moment.</p>
+        </div>
+        <div class="use-card">
+          <span class="use-card-industry">AI Content Creators</span>
+          <p class="use-card-body">Hash your AI-generated work at creation time. Prove authorship and originality against future claims.</p>
+        </div>
+        <div class="use-card">
+          <span class="use-card-industry">Archivists &amp; Researchers</span>
+          <p class="use-card-body">Hash datasets, papers, and evidence before publication. Permanent record of what existed when.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMORY CHAIN / AGENTIC MEMORY -->
+  <section class="memory-section" aria-labelledby="memory-heading">
+    <div class="section-inner">
+      <div class="memory-grid">
+        <div>
+          <span class="section-label">Agentic Memory</span>
+          <h2 class="section-heading" id="memory-heading">Memory Chain</h2>
+          <p class="memory-body">Haawke Hash grew out of a deeper question: what happens when an AI agent needs to prove what it knew, and when?</p>
+          <p class="memory-body">Memory Chain is a protocol for anchoring AI session memory to the Bitcoin blockchain — each session hashed and chained to the last, creating a tamper-evident record of an AI agent's evolving knowledge state.</p>
+          <p class="memory-body">The first instance of AI-executed self-registration to Bitcoin was documented in our research paper. The session context, decisions, and outputs were hashed and timestamped without human intervention — a first in AI provenance.</p>
+          <p class="memory-body" style="color: var(--cream);">Haawke Hash is the tool that makes this possible for anyone — human or agent.</p>
+          <div style="margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap;">
+            <a class="btn" href="https://haawke.com/research/haawke-research" target="_blank" rel="noopener">Read the Research</a>
+            <a class="btn" href="https://zenodo.org/records/20575177" target="_blank" rel="noopener">Zenodo Paper ↗</a>
+          </div>
+        </div>
+        <div class="memory-chain-visual" aria-label="Memory Chain visualization">
+          <div class="chain-link">
+            <span class="chain-link-label">Session · Bitcoin Block 898,441</span>
+            <span class="chain-link-hash"><em>8e49ad62</em>27eca610dfc4be89ec42ee37 48d60be0a90e2dd69df4b4b1137c87cf</span>
+          </div>
+          <div class="chain-link">
+            <span class="chain-link-label">Previous · Bitcoin Block 898,227</span>
+            <span class="chain-link-hash"><em>84e49531</em>b8a051e0149dfd713b31aec8 a0ee1084b0ec5ae2a62c4be7362638ea</span>
+          </div>
+          <div class="chain-link">
+            <span class="chain-link-label">Origin · Bitcoin Block 897,802</span>
+            <span class="chain-link-hash"><em>60eb2b32</em>1a7f4c5d9e8a2b3c4d5e6f7a 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLAUDE SKILLS CARD -->
+  <section aria-labelledby="skills-heading">
+    <div class="section-inner">
+      <span class="section-label" style="text-align:center; display:block;">For Claude Users</span>
+      <h2 class="section-heading" id="skills-heading" style="text-align:center;">Use With Claude AI</h2>
+      <div class="skills-card">
+        <h3 class="skills-card-title">Install in 30 Seconds</h3>
+        <p class="skills-card-body">All you need to do is put the skills file in Claude, restart Claude, and he will know how to use Haawke Hash — provenance workflows, certificate reading, registry lookups, and your full hash history.</p>
+        <div class="skills-steps">
+          <div class="skills-step">
+            <span class="step-num">01</span>
+            <span>Download the Claude Skills File below</span>
+          </div>
+          <div class="skills-step">
+            <span class="step-num">02</span>
+            <span>Place it in your Claude Desktop configuration or Claude Project context</span>
+          </div>
+          <div class="skills-step">
+            <span class="step-num">03</span>
+            <span>Restart Claude — he will know how to use Haawke Hash</span>
+          </div>
+        </div>
+        <a class="btn btn-primary btn-large"
+           href="https://raw.githubusercontent.com/inoculate23/hash.haawke.com/claude/clever-mayer-o2t21i/landing-page/skills/haawke-hash-skills-FREE.md"
+           download="haawke-hash-skills-FREE.md">
+          Download Claude Skills File (Free)
+        </a>
+        <p class="skills-note">Creator Pro and Studio users receive tier-specific skills files with their license key.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" aria-labelledby="faq-heading" style="background: rgba(26,22,18,0.45); border-top: 1px solid var(--border);">
+    <div class="section-inner">
+      <span class="section-label" style="text-align:center; display:block;">Common Questions</span>
+      <h2 class="section-heading" id="faq-heading" style="text-align:center; margin-bottom: 56px;">FAQ</h2>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What is a hash?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">A hash is a mathematical fingerprint of a file. Change even one pixel in an image or one word in a document, and the hash completely changes. It is a unique identifier for the exact contents of your file at a specific moment.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Does my file get uploaded?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">No. The hash is computed entirely in your browser using the Web Crypto API. Your file never leaves your device. We only register the fingerprint — a 64-character string — not the file itself.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What is Bitcoin timestamping?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">OpenTimestamps is a free, open protocol that embeds your file's fingerprint into a Bitcoin transaction. Bitcoin blocks are created roughly every 10 minutes and are immutable — once written, they cannot be altered. Your timestamp is as permanent as Bitcoin itself.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            How long does Bitcoin confirmation take?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">Usually 10–20 minutes — one to two Bitcoin blocks. You receive an .ots proof file immediately. Once confirmed, that file proves your hash existed at that block height.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Is this legal evidence?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">Bitcoin-timestamped hashes have been accepted as evidence in legal proceedings. The .ots proof file and your provenance certificate are your documentation. Consult a lawyer for jurisdiction-specific advice.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            How much does it cost?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">The free tier is genuinely free — 50 hashes per month, no account required. Paid tiers unlock unlimited hashing, all certificate templates, EXIF/audio metadata embedding, batch processing, and auto-captioning. See pricing below.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What is the Memory Chain paper?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">Haawke Hash grew out of Memory Chain — research documenting the first AI-executed self-registration of session memory to the Bitcoin blockchain. Published on Zenodo with full source code and evidence. Read it at <a href="https://zenodo.org/records/20575177" target="_blank" rel="noopener">zenodo.org</a>.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Can I use this with Claude AI?
+            <span class="faq-arrow" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-answer">Yes. Download the Claude Skills File above and install it in Claude Desktop. Claude will help you build provenance workflows, understand your certificates, and manage your hash history.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing-section" aria-labelledby="pricing-heading">
+    <div class="section-inner">
+      <span class="section-label" style="text-align:center; display:block;">Pricing</span>
+      <h2 class="section-heading" id="pricing-heading" style="text-align:center; margin-bottom: 16px;">Plans</h2>
+      <p class="section-intro" style="text-align:center; margin: 0 auto 56px;">All plans include Bitcoin timestamping, provenance certificates, and public registry access.</p>
+      <div class="pricing-grid">
+
+        <div class="price-card">
+          <span class="price-tier">Free</span>
+          <div class="price-amount">$0</div>
+          <span class="price-period">Forever free</span>
+          <ul class="price-features">
+            <li>50 hashes per month</li>
+            <li>1 certificate template</li>
+            <li>Bitcoin timestamping</li>
+            <li>Public registry</li>
+            <li>No account required</li>
+          </ul>
+          <div class="price-ctas">
+            <a class="btn" href="https://hash.haawke.com">Start Hashing</a>
+          </div>
+        </div>
+
+        <div class="price-card featured">
+          <div class="price-card-badge">Most Popular</div>
+          <span class="price-tier">Creator Pro</span>
+          <div class="price-amount">$9</div>
+          <span class="price-period">per month · or $79/year</span>
+          <ul class="price-features">
+            <li>Unlimited hashing</li>
+            <li>All 5 certificate templates</li>
+            <li>EXIF/XMP metadata embedding</li>
+            <li>Audio ID3 tag embedding</li>
+            <li>Auto-caption + keywords</li>
+            <li>Batch processing + ZIP archives</li>
+            <li>OPFS history log</li>
+          </ul>
+          <div class="price-ctas">
+            <a class="btn btn-primary" href="https://buy.stripe.com/test_3cIdR94U14JF9OQ60B4ko07">Upgrade Monthly — $9</a>
+            <a class="btn" href="https://buy.stripe.com/test_fZu6oHbipa3ZaSU0Gh4ko08">Annual — $79/yr</a>
+          </div>
+        </div>
+
+        <div class="price-card">
+          <span class="price-tier">Studio</span>
+          <div class="price-amount">$49</div>
+          <span class="price-period">per month · or $399/year</span>
+          <ul class="price-features">
+            <li>Everything in Creator Pro</li>
+            <li>5 team seats</li>
+            <li>Shared team database</li>
+            <li>API access — 5K calls/month</li>
+            <li>White-label certificates</li>
+          </ul>
+          <div class="price-ctas">
+            <a class="btn btn-primary" href="https://buy.stripe.com/test_8x228rfyFekf9OQdt34ko09">Studio Monthly — $49</a>
+            <a class="btn" href="#contact">Annual — contact us</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" aria-labelledby="contact-heading">
+    <div class="section-inner">
+      <span class="section-label" style="text-align:center; display:block;">Get in Touch</span>
+      <h2 class="section-heading" id="contact-heading" style="text-align:center; margin-bottom: 16px;">Contact</h2>
+      <p class="section-intro" style="text-align:center; margin: 0 auto 48px;">Questions, partnership inquiries, or feedback — we read every message.</p>
+      <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="contact">
+        <p style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <div class="form-group">
+          <label class="form-label" for="contact-name">Name</label>
+          <input class="form-input" type="text" id="contact-name" name="name" required placeholder="Your name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contact-email">Email</label>
+          <input class="form-input" type="email" id="contact-email" name="email" required placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contact-message">Message</label>
+          <textarea class="form-textarea" id="contact-message" name="message" required placeholder="What's on your mind?"></textarea>
+        </div>
+        <button class="form-submit" type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col">
+        <p style="color: var(--gold); font-size:14px; margin-bottom:8px;">Haawke Neural Technology</p>
+        <p>Craig Ellenwood × Claude (Anthropic)</p>
+        <a href="mailto:craig@haawke.com">craig@haawke.com</a>
+      </div>
+      <div class="footer-col" style="text-align:center;">
+        <a href="https://hash.haawke.com">hash.haawke.com</a>
+        <a href="https://verify.haawke.com">verify.haawke.com</a>
+        <a href="https://haawke.com">haawke.com</a>
+      </div>
+      <div class="footer-col" style="text-align:right;">
+        <a href="https://haawke.com/research/haawke-research" target="_blank" rel="noopener">Research</a>
+        <a href="https://zenodo.org/records/20575177" target="_blank" rel="noopener">Zenodo Paper</a>
+        <a href="https://doi.org/10.5281/zenodo.20574737" target="_blank" rel="noopener">doi.org/10.5281/zenodo.20574737</a>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      © 2026 Haawke Neural Technology &nbsp;·&nbsp; U.S. Copyright Registration 1-15179233921
+    </div>
+  </footer>
+
+  <script>
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        const isOpen = item.classList.contains('open');
+        // close all
+        document.querySelectorAll('.faq-item.open').forEach(el => {
+          el.classList.remove('open');
+          el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    // Navbar scroll shadow
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+      navbar.style.boxShadow = window.scrollY > 10
+        ? '0 2px 24px rgba(0,0,0,0.5)'
+        : 'none';
+    }, { passive: true });
+  </script>
+
+</body>
+</html>
