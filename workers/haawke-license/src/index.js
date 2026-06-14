@@ -235,7 +235,7 @@ async function sendLicenseEmail(email, key, tier, env) {
       <p style="font-size: 18px; background: #f4f4f4; padding: 16px; border-radius: 8px; font-family: monospace; letter-spacing: 1px;">
         ${key}
       </p>
-      <p>Enter it at <a href="https://hash.haawke.com">hash.haawke.com</a> under Settings &rarr; License Key.</p>
+      <p>Enter it at <a href="https://hash.haawke.com/app">hash.haawke.com</a> — open <strong>Author Details</strong> and paste your key into the <strong>License</strong> field, then press Apply.</p>
       <p>Your key unlocks:</p>
       <ul>${features}</ul>
       <p>Verify your files at <a href="https://verify.haawke.com">verify.haawke.com</a><br>
