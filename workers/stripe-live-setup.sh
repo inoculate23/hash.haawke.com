@@ -33,7 +33,7 @@ WEBHOOK_URL="https://haawke-license.haawkeai.workers.dev/webhook"
 s() { stripe "$@" --api-key "$LIVE_KEY"; }
 
 extract_id() { grep '"id"' | head -1 | sed 's/.*"id": "\([^"]*\)".*/\1/'; }
-extract_url() { grep '"url"' | head -1 | sed 's/.*"url": "\([^"]*\)".*/\1/'; }
+extract_url() { grep '"url"' | grep 'buy.stripe.com\|donate.stripe.com' | head -1 | sed 's/.*"url": "\([^"]*\)".*/\1/'; }
 extract_secret() { grep '"secret"' | head -1 | sed 's/.*"secret": "\([^"]*\)".*/\1/'; }
 
 echo ""

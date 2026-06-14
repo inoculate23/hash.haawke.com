@@ -8,10 +8,10 @@
 // GET  /lookup-email?email=E    — admin lookup (X-Admin-Key header)
 
 const PRICE_TIERS = {
-  'price_1Th97UGl715hGhcRWwop5Ejx': 'pro',     // Creator Pro Monthly $9
-  'price_1Th97VGl715hGhcRz8FtBFPV': 'pro',     // Creator Pro Annual $79
-  'price_1Th98rGl715hGhcRltDkB5i0': 'studio',  // Studio Monthly $49
-  'price_1Th98sGl715hGhcRliBBDRV8': 'studio',  // Studio Annual $399
+  'price_1Ti5P2Gl715hGhcR6WiQAoml': 'pro',     // Creator Pro Monthly $9  (live)
+  'price_1Ti5P2Gl715hGhcRcYL1QALh': 'pro',     // Creator Pro Annual $79 (live)
+  'price_1Ti5P3Gl715hGhcRhhR1oD8I': 'studio',  // Studio Monthly $49  (live)
+  'price_1Ti5P3Gl715hGhcRDEWKjMSx': 'studio',  // Studio Annual $399 (live)
 };
 
 const TIER_NAMES = { pro: 'Creator Pro', studio: 'Studio' };
