@@ -1442,7 +1442,7 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
           <br>
           <strong style="color:var(--cream)">Hash:</strong> ${currentHash.slice(0,32)}...<br>
           <strong style="color:var(--cream)">Calendar:</strong> ots.haawke.com → Bitcoin blockchain<br>
-          <strong style="color:var(--cream)">Note:</strong> Full blockchain confirmation takes ~1 hour after Bitcoin block inclusion.<br>
+          <strong style="color:var(--cream)">Note:</strong> Submitted to Bitcoin calendars — block confirmation typically arrives within 24h.<br>
           Verify anytime at opentimestamps.org/verify
         `;
 
@@ -1522,7 +1522,7 @@ SESSION ${index} — ${date}
 Title: ${title}
 Hash: ${hash}
 Verified: ${verifyUrl}
-Bitcoin timestamp: pending confirmation (~1hr after block inclusion)${chainLine}
+Bitcoin timestamp: submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h)${chainLine}
 
 Summary: ${summary}${decisionBlock}
 
@@ -1561,9 +1561,19 @@ Verify at: ${verifyUrl}`;
     viewer.style.display = 'block';
     container.innerHTML = entries.map((e, i) => {
       const shortHash = e.hash ? `${e.hash.slice(0, 16)} ··· ${e.hash.slice(-8)}` : '—';
-      const otsStatus = e.ots_confirmed
-        ? '<span class="chain-entry-ots ots-confirmed">✓ BTC Confirmed</span>'
-        : '<span class="chain-entry-ots ots-pending">⏳ Pending</span>';
+      let otsStatus;
+      if (e.ots_confirmed || e.ots_status === 'confirmed') {
+        const blockLabel = e.bitcoin_block ? ` · Block ${e.bitcoin_block.toLocaleString()}` : '';
+        otsStatus = `<span class="chain-entry-ots ots-confirmed">✓ BTC Confirmed${blockLabel}</span>`;
+      } else {
+        const stampedAt = e.otsTimestamp || e.sealed_at;
+        let elapsed = '';
+        if (stampedAt) {
+          const hrs = Math.round((Date.now() - new Date(stampedAt).getTime()) / 3600000 * 10) / 10;
+          elapsed = ` · ${hrs}h`;
+        }
+        otsStatus = `<span class="chain-entry-ots ots-pending" title="Submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h)">⏳ Pending${elapsed}</span>`;
+      }
       const decisions = (e.key_decisions || [])
         .map(d => `<div class="chain-decision">${d}</div>`).join('');
       const decisionsBlock = decisions
@@ -1619,7 +1629,7 @@ SESSION ${e.index || ''} — ${e.date || ''}
 Title: ${e.title || ''}
 Hash: ${e.hash || ''}
 Verified: ${e.verify_url || ''}
-Bitcoin timestamp: ${e.ots_confirmed ? 'confirmed' : 'pending confirmation (~1hr after block inclusion)'}
+Bitcoin timestamp: ${(e.ots_confirmed || e.ots_status === 'confirmed') ? `confirmed · block ${e.bitcoin_block || 'unknown'}` : 'submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h)'}
 
 Summary: ${e.summary || ''}${decisionBlock}
 

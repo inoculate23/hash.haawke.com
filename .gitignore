@@ -28,3 +28,29 @@ wrangler.toml
 
 # worker configs contain no secrets — keep them in the repo
 !workers/*/wrangler.toml
+
+# OTS upgrade backups (created by `ots upgrade` in-place)
+*.ots.bak
+
+# One-off utility scripts (not deployed artifacts)
+scripts/
+
+# Sales portal — pending Cloudflare Access setup, not deployed yet
+sales-portal/
+
+# Spec/build docs and marketing source files
+build-specs/
+marketing/
+
+# Session/analysis files not part of the site
+fable_log_-copy.md
+fable-handoff-window.jsonl
+fable-autonomous-evidence.md
+registry-export.json
+analysis.pdf
+memory-chain-v2-build-spec.md
+mempalace-cryptographic-provenance-spec.md.pdf
+cloudflare-access-sales-portal-spec.md.pdf
+haawke-hash-v1.3claude-code-spec.md
+V2-mempalace-sycophancy-mitigation-spec.pdf
+landing-oage-spec.md

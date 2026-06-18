@@ -4,8 +4,9 @@
 // Updated June 2026:
 //   - /ots now returns valid .ots files (OTS magic header prepended)
 //   - /register accepts type, prompt, timestamp fields
-//   - /verify/[hash] returns ots_status + bitcoin_block
+//   - /verify/[hash] returns ots_status + bitcoin_block + ots_pending_hours
 //   - /recent supports ?limit=
+//   - /ots/confirm patches KV with confirmed block (shared-secret protected)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -67,10 +68,16 @@ export default {
     if (path === '/recent' && request.method === 'GET') {
       return handleRecent(url, env);
     }
+    if (path === '/ots/confirm' && request.method === 'POST') {
+      return handleOtsConfirm(request, env);
+    }
+    if (path === '/ots/tag' && request.method === 'POST') {
+      return handleOtsTag(request, env);
+    }
     if (path === '/' || path === '') {
       return new Response(JSON.stringify({
         name: 'Haawke Provenance Registry',
-        version: '1.1',
+        version: '1.2',
         author: 'Craig Ellenwood × Claude (Anthropic)',
         orcid: '0009-0001-6475-5109',
         org: 'Haawke Neural Technology',
@@ -79,6 +86,8 @@ export default {
           register: 'POST /register',
           recent: 'GET /recent?limit=20',
           ots: 'POST /ots',
+          ots_confirm: 'POST /ots/confirm  (secret-protected)',
+          ots_tag: 'POST /ots/tag  (secret-protected)',
         },
         tool: 'https://hash.haawke.com',
       }, null, 2), {
@@ -244,13 +253,28 @@ async function handleVerify(hash, env) {
   }
 
   const record = JSON.parse(raw);
+  const otsStatus = record.ots_status || 'pending';
+
+  let otsPendingHours = null;
+  let otsPendingMessage = null;
+  if (otsStatus === 'pending' && record.registered) {
+    const elapsedMs = Date.now() - new Date(record.registered).getTime();
+    otsPendingHours = Math.round(elapsedMs / 3600000 * 10) / 10;
+    otsPendingMessage = `Submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h). Pending ${otsPendingHours}h.`;
+    if (otsPendingHours >= 48) {
+      console.warn(`[OTS-STALE] hash=${hash.slice(0, 16)} pending ${otsPendingHours}h since ${record.registered}`);
+    }
+  }
+
   return new Response(JSON.stringify({
     status: 'verified',
     ...record,
     registered: true,
     registered_at: record.registered,
-    ots_status: record.ots_status || 'pending',
+    ots_status: otsStatus,
     bitcoin_block: record.bitcoin_block || null,
+    ots_pending_hours: otsPendingHours,
+    ots_pending_message: otsPendingMessage,
   }), {
     headers: { ...CORS, 'Content-Type': 'application/json' },
   });
@@ -272,4 +296,136 @@ async function handleRecent(url, env) {
   }), {
     headers: { ...CORS, 'Content-Type': 'application/json' },
   });
+}
+
+// Statuses that /ots/tag may set — never 'confirmed' (that goes through /ots/confirm with a block)
+const TAGGABLE_STATUSES = new Set(['legacy_unparseable', 'stamp_failed', 'pending']);
+
+async function handleOtsTag(request, env) {
+  try {
+    const authHeader = request.headers.get('X-Confirm-Secret') || '';
+    if (!env.OTS_CONFIRM_SECRET || authHeader !== env.OTS_CONFIRM_SECRET) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await request.json();
+    const { hash, ots_status, note } = body;
+
+    if (!hash || hash.length !== 64) {
+      return new Response(JSON.stringify({ error: 'Invalid hash — must be 64 character SHA-256' }), {
+        status: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!TAGGABLE_STATUSES.has(ots_status)) {
+      return new Response(JSON.stringify({ error: `Invalid ots_status. Allowed: ${[...TAGGABLE_STATUSES].join(', ')}` }), {
+        status: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const raw = await env.PROVENANCE.get(hash);
+    if (!raw) {
+      return new Response(JSON.stringify({ error: 'Hash not found in registry' }), {
+        status: 404,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const record = JSON.parse(raw);
+    const prev = record.ots_status;
+    record.ots_status = ots_status;
+    if (note) record.ots_tag_note = note;
+    record.ots_tagged_at = new Date().toISOString();
+    await env.PROVENANCE.put(hash, JSON.stringify(record));
+
+    console.log(`[OTS-TAG] hash=${hash.slice(0, 16)} ${prev} → ${ots_status}`);
+
+    return new Response(JSON.stringify({
+      status: 'tagged',
+      hash,
+      ots_status,
+      prev_status: prev,
+      note: note || null,
+    }), {
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 500,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleOtsConfirm(request, env) {
+  try {
+    // Shared-secret gate — set via: wrangler secret put OTS_CONFIRM_SECRET
+    const authHeader = request.headers.get('X-Confirm-Secret') || '';
+    if (!env.OTS_CONFIRM_SECRET || authHeader !== env.OTS_CONFIRM_SECRET) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await request.json();
+    const { hash, bitcoin_block } = body;
+
+    if (!hash || hash.length !== 64) {
+      return new Response(JSON.stringify({ error: 'Invalid hash — must be 64 character SHA-256' }), {
+        status: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!bitcoin_block || typeof bitcoin_block !== 'number') {
+      return new Response(JSON.stringify({ error: 'bitcoin_block must be a number' }), {
+        status: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const raw = await env.PROVENANCE.get(hash);
+    if (!raw) {
+      return new Response(JSON.stringify({ error: 'Hash not found in registry' }), {
+        status: 404,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const record = JSON.parse(raw);
+    if (record.ots_status === 'confirmed') {
+      return new Response(JSON.stringify({
+        status: 'already_confirmed',
+        bitcoin_block: record.bitcoin_block,
+        message: 'Record was already confirmed — no change made.',
+      }), {
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    record.ots_status = 'confirmed';
+    record.bitcoin_block = bitcoin_block;
+    record.ots_confirmed_at = new Date().toISOString();
+    await env.PROVENANCE.put(hash, JSON.stringify(record));
+
+    console.log(`[OTS-CONFIRM] hash=${hash.slice(0, 16)} block=${bitcoin_block}`);
+
+    return new Response(JSON.stringify({
+      status: 'confirmed',
+      hash,
+      bitcoin_block,
+      ots_confirmed_at: record.ots_confirmed_at,
+    }), {
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 500,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
 }

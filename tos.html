@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — Haawke Neural Technology</title>
+  <meta name="description" content="Terms of Service for hash.haawke.com, verify.haawke.com, signal.haawke.com, and related Haawke Neural Technology services.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0c0a08;
+      --gold:    #c9a84c;
+      --gold-dim: rgba(201,168,76,0.55);
+      --cream:   #f5f0e8;
+      --dim:     rgba(245,240,232,0.72);
+      --dimmer:  rgba(245,240,232,0.45);
+      --border:  rgba(201,168,76,0.22);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    /* ── NAVBAR ─────────────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(12,10,8,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      height: 60px;
+      gap: 32px;
+    }
+
+    .nav-brand {
+      font-family: 'Courier Prime', monospace;
+      font-size: 15px;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .nav-link {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      color: var(--dimmer);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .nav-link:hover { color: var(--cream); }
+
+    /* ── CONTENT ─────────────────────────────────────────────── */
+    .page-wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 120px 32px 96px;
+    }
+
+    .page-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      color: var(--cream);
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .meta {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      color: var(--dimmer);
+      margin-bottom: 56px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .intro {
+      font-size: 19px;
+      color: var(--dim);
+      margin-bottom: 48px;
+      line-height: 1.75;
+    }
+
+    /* ── SECTIONS ────────────────────────────────────────────── */
+    .tos-section {
+      margin-bottom: 48px;
+    }
+
+    .tos-section h2 {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+
+    .tos-section p {
+      color: var(--dim);
+      margin-bottom: 16px;
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .tos-section p:last-child { margin-bottom: 0; }
+
+    .tos-section ul {
+      margin: 12px 0 16px 0;
+      padding-left: 24px;
+    }
+
+    .tos-section li {
+      color: var(--dim);
+      font-size: 17px;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .caps {
+      font-size: 15px;
+      line-height: 1.75;
+      font-family: 'Courier Prime', monospace;
+      letter-spacing: 0.03em;
+    }
+
+    .placeholder-note {
+      background: rgba(201,168,76,0.07);
+      border-left: 2px solid var(--gold-dim);
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      font-size: 15px;
+      color: var(--dimmer);
+      font-style: italic;
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { color: var(--cream); }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 32px;
+      background: rgba(12,10,8,0.9);
+    }
+
+    .footer-inner {
+      max-width: 740px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer-copy {
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      color: var(--dimmer);
+    }
+
+    .footer-links {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--dimmer);
+    }
+
+    .footer-links a { color: var(--dimmer); }
+    .footer-links a:hover, .footer-links a:focus { color: var(--gold); outline: none; }
+
+    @media (max-width: 600px) {
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a class="nav-brand" href="https://hash.haawke.com">Haawke</a>
+    <a class="nav-link" href="https://hash.haawke.com/app">Hash</a>
+    <a class="nav-link" href="https://verify.haawke.com">Verify</a>
+  </nav>
+
+  <main class="page-wrap">
+
+    <div class="page-label">Legal</div>
+    <h1>Terms of Service</h1>
+    <p class="meta">
+      Effective date: June 17, 2026 &nbsp;·&nbsp; Last updated: June 17, 2026
+    </p>
+
+    <p class="intro">
+      These Terms govern your use of hash.haawke.com, verify.haawke.com, signal.haawke.com,
+      and related services operated by Haawke Neural Technology ("Haawke," "we," "us," or "our")
+      (collectively, the "Service"). By using the Service, you agree to these Terms.
+    </p>
+
+    <div class="tos-section">
+      <h2>1. What the Service is, and isn't</h2>
+      <p>
+        The Service computes cryptographic hashes of content you submit, registers those hashes
+        along with any attribution metadata you provide, and submits them for timestamp anchoring
+        to the Bitcoin blockchain via the OpenTimestamps protocol. The Service provides evidence
+        that specific content existed, unaltered, at a specific point in time.
+      </p>
+      <p>
+        It does not verify the truth, legality, or originality of the content itself, does not
+        constitute formal legal notarization, does not constitute legal advice, and is not a
+        substitute for registering your work with a copyright office or consulting an attorney
+        about intellectual property protection.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>2. Eligibility and accounts</h2>
+      <p>
+        You must be at least 18 years old, or have a parent or guardian's consent, to use the
+        Service. You're responsible for maintaining the confidentiality of any account credentials
+        and for all activity that occurs under your account.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>3. Acceptable use</h2>
+      <p>
+        You agree not to use the Service to submit content that is illegal, infringes on someone
+        else's intellectual property rights, contains another person's personal information without
+        their consent, or is submitted for the purpose of misrepresenting authorship, timing, or
+        authenticity. We reserve the right to suspend or terminate access for violations of this
+        section.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>4. Fees and payment</h2>
+      <p>
+        Paid features are billed through Stripe. By making a purchase, you agree to Stripe's terms
+        governing the payment itself. Fees are non-refundable except where required by law or stated
+        otherwise at the time of purchase.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>5. Your content and intellectual property</h2>
+      <p>
+        You retain all ownership rights to content you submit for hashing. We do not claim ownership
+        of it, and as described in our Privacy Policy, we generally do not retain a copy of the
+        original content itself, only its cryptographic digest. The Haawke name, logo, and related
+        branding are our property and may not be used without permission.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>6. Public registry</h2>
+      <p>
+        Registering a hash through the Service publishes the hash, timestamp proof, and any
+        attribution metadata you supply on a public, openly accessible registry. This is permanent
+        by design, in the same way the underlying Bitcoin anchoring is permanent: once submitted,
+        neither you nor we can retract or alter it. You're responsible for what you choose to submit.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>7. Third-party services and infrastructure outside our control</h2>
+      <p>
+        The Service depends on infrastructure we do not own, operate, or control, including but not
+        limited to Cloudflare (hosting and network infrastructure), Stripe (payment processing), and
+        the Bitcoin network together with OpenTimestamps calendar servers (timestamp anchoring).
+        You acknowledge and agree that:
+      </p>
+      <ul>
+        <li>
+          The availability, performance, and uptime of the Service depend in part on these third
+          parties, and we are not responsible or liable for outages, slowdowns, errors, security
+          incidents, or data loss originating from their systems.
+        </li>
+        <li>
+          The time it takes for a submitted hash to receive a confirmed Bitcoin timestamp depends
+          on Bitcoin network conditions and third-party calendar server behavior, neither of which
+          we control. We do not guarantee any specific confirmation timeframe.
+        </li>
+        <li>
+          If a third-party provider changes its terms, pricing, or availability, or ceases
+          operating entirely, the Service may be disrupted or discontinued as a result, and we
+          will not be liable for that disruption.
+        </li>
+      </ul>
+    </div>
+
+    <div class="tos-section">
+      <h2>8. Disclaimer of warranties</h2>
+      <p class="caps">
+        THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND,
+        WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR THAT THE SERVICE
+        WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE. WE DO NOT WARRANT THAT TIMESTAMP
+        CONFIRMATION WILL OCCUR WITHIN ANY PARTICULAR TIMEFRAME OR AT ALL, GIVEN OUR DEPENDENCE
+        ON THIRD-PARTY INFRASTRUCTURE DESCRIBED IN SECTION 7.
+      </p>
+      <p>
+        If you are a consumer in the EU or UK, mandatory consumer protection laws may give you
+        rights this section cannot exclude. Nothing in this section limits any right that cannot
+        be excluded or limited under applicable law.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>9. Limitation of liability</h2>
+      <p class="caps">
+        TO THE MAXIMUM EXTENT PERMITTED BY LAW, HAAWKE AND ITS OPERATORS WILL NOT BE LIABLE FOR
+        ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF
+        PROFITS, REVENUE, DATA, OR GOODWILL, ARISING FROM YOUR USE OF, OR INABILITY TO USE, THE
+        SERVICE, INCLUDING WHERE THAT LOSS ARISES FROM A THIRD-PARTY OUTAGE OR FAILURE DESCRIBED
+        IN SECTION 7. OUR TOTAL AGGREGATE LIABILITY FOR ANY CLAIM ARISING FROM THESE TERMS OR THE
+        SERVICE WILL NOT EXCEED THE AMOUNT YOU PAID US IN THE TWELVE MONTHS PRECEDING THE CLAIM,
+        OR ONE HUNDRED US DOLLARS, WHICHEVER IS GREATER.
+      </p>
+      <p>
+        This limitation does not apply to liability that cannot be excluded under applicable law,
+        such as liability for death, personal injury, fraud, or gross negligence where such
+        exclusion is not permitted.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>10. Indemnification</h2>
+      <p>
+        You agree to indemnify and hold Haawke harmless from any claims, damages, or expenses,
+        including reasonable legal fees, arising from your use of the Service, content you submit,
+        or your violation of these Terms.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>11. Force majeure</h2>
+      <p>
+        We are not liable for any failure or delay in performance resulting from causes beyond our
+        reasonable control, including but not limited to outages or failures of third-party
+        infrastructure providers, internet or network disruptions, Bitcoin network congestion or
+        behavior, natural disasters, acts of government, or other events of force majeure.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>12. Termination</h2>
+      <p>
+        We may suspend or terminate your access to the Service at any time for violation of these
+        Terms. You may stop using the Service at any time. Sections that by their nature should
+        survive termination, including Sections 6 through 11, will survive.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>13. Changes to these Terms</h2>
+      <p>
+        We may update these Terms from time to time. Continued use of the Service after an update
+        constitutes acceptance of the revised Terms. We will post the effective date of the latest
+        version here.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>14. Governing law and disputes</h2>
+      <div class="placeholder-note">
+        Placeholder — recommend confirming with counsel: these Terms are governed by the laws of
+        the State of Washington, USA, without regard to conflict-of-law principles. Any dispute
+        will be resolved in the state or federal courts located in Washington, except where
+        mandatory consumer-protection law in your jurisdiction, such as for EU or UK residents,
+        requires otherwise.
+      </div>
+    </div>
+
+    <div class="tos-section">
+      <h2>15. Miscellaneous</h2>
+      <p>
+        If any provision of these Terms is found unenforceable, the remaining provisions will
+        remain in full effect. These Terms, together with the Privacy Policy, constitute the
+        entire agreement between you and Haawke regarding the Service.
+      </p>
+    </div>
+
+    <div class="tos-section">
+      <h2>16. Contact</h2>
+      <p>
+        Questions about these Terms can be sent to
+        <a href="mailto:craig@haawke.com">craig@haawke.com</a>.
+      </p>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-copy">
+        © 2026 Haawke Neural Technology
+      </div>
+      <div class="footer-links">
+        <a href="/">hash.haawke.com</a>
+        &nbsp;·&nbsp;
+        <a href="/tos">Terms of Service</a>
+        &nbsp;·&nbsp;
+        <span>Privacy Policy</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
