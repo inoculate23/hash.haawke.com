@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -895,25 +896,34 @@
     }, 700);
   }
 
-  function sendEmail() {
-    const subject = encodeURIComponent('Haawke Hash Enterprise Inquiry — ' + (answers[0] ? answers[0].a : 'New Lead'));
-    const body = encodeURIComponent(
-      'Haawke Hash Enterprise Inquiry\n' +
-      '==============================\n\n' +
-      answers.map(a => a.q + '\n' + a.a).join('\n\n') +
-      '\n\n---\nSent via Haawke Hash enterprise pitch page'
-    );
-    const a = document.createElement('a');
-    a.href = 'mailto:craig@haawke.com?subject=' + subject + '&body=' + body;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  async function sendEmail() {
+    const btn = document.querySelector('.send-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
 
-    // Show confirmation in modal
-    document.getElementById('send-email-area').innerHTML =
-      '<div style="padding:12px 16px;font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--gold);letter-spacing:0.1em;">✓ Inquiry sent — Craig will be in touch within one business day.</div>';
+    const message = answers.map(a => a.q + '\n' + a.a).join('\n\n');
+    const company = answers[0] ? answers[0].a : 'Unknown';
+
+    try {
+      const res = await fetch('https://formspree.io/f/xnjewwqz', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: 'Haawke Hash Enterprise Inquiry — ' + company,
+          message: 'Haawke Hash Enterprise Inquiry\n==============================\n\n' + message + '\n\n---\nSent via Haawke Hash enterprise pitch page'
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById('send-email-area').innerHTML =
+          '<div style="padding:12px 16px;font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--gold);letter-spacing:0.1em;">✓ Inquiry sent — Craig will be in touch within one business day.</div>';
+      } else {
+        throw new Error('Send failed');
+      }
+    } catch(e) {
+      document.getElementById('send-email-area').innerHTML =
+        '<div style="padding:12px 16px;font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:#e50914;letter-spacing:0.1em;">Something went wrong — please email craig@haawke.com directly.</div>';
+    }
   }
 </script>
 </body>
