@@ -160,7 +160,7 @@ async function handleOTS(request) {
 async function handleRegister(request, env) {
   try {
     const body = await request.json();
-    const { hash, filename, author, orcid, org, source, type, prompt, timestamp } = body;
+    const { hash, filename, author, orcid, org, source, type, prompt, timestamp, session_type, surface } = body;
 
     if (!hash || hash.length !== 64) {
       return new Response(JSON.stringify({ error: 'Invalid hash — must be 64 character SHA-256' }), {
@@ -192,6 +192,8 @@ async function handleRegister(request, env) {
       type: type || null,
       prompt: prompt || null,
       timestamp: timestamp || null,
+      session_type: session_type || 'human-initiated',
+      surface: surface || null,
       ots_status: 'pending',
       bitcoin_block: null,
       registered: new Date().toISOString(),
@@ -208,6 +210,7 @@ async function handleRegister(request, env) {
       filename: record.filename,
       author: record.author,
       org: record.org,
+      session_type: record.session_type,
       type: record.type,
       source: record.source,
       registered: record.registered,
