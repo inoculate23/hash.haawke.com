@@ -78,6 +78,23 @@ async function sha256HexOfString(str) {
 
 const HEX64 = /^[0-9a-f]{64}$/;
 
+// ─── Dual-read KV compat ─────────────────────────────────────────────────
+// The pre-2.0 worker stored records under the raw hash as the KV key
+// ({hash} -> record). Schema v2.0 stores under `record:{hash}` instead.
+// Reads try the new key first, then fall back to the old one, so existing
+// production records stay resolvable without being touched or migrated.
+// New writes always go to `record:{hash}` only — existing keys are never
+// written to, moved, or deleted.
+async function getRecordDualRead(env, hash) {
+  const v2Raw = await env.PROVENANCE.get(`record:${hash}`);
+  if (v2Raw) return { raw: v2Raw, record: JSON.parse(v2Raw), legacy: false };
+
+  const legacyRaw = await env.PROVENANCE.get(hash);
+  if (legacyRaw) return { raw: legacyRaw, record: JSON.parse(legacyRaw), legacy: true };
+
+  return null;
+}
+
 export class SequenceCounter {
   constructor(state) {
     this.state = state;
@@ -284,12 +301,14 @@ async function handleRegister(request, env) {
 
     const outputHash = content.output_hash;
 
-    const existing = await env.PROVENANCE.get(`record:${outputHash}`);
+    const existing = await getRecordDualRead(env, outputHash);
     if (existing) {
       return json({
         status: 'exists',
-        message: 'This hash is already registered. First record preserved.',
-        record: JSON.parse(existing),
+        message: existing.legacy
+          ? 'This hash is already registered (pre-2.0 record). First record preserved.'
+          : 'This hash is already registered. First record preserved.',
+        record: existing.record,
       });
     }
 
@@ -411,14 +430,14 @@ async function handleRegister(request, env) {
   }
 }
 
-// ─── /verify/[hash] — schema v2.0 ───────────────────────────────────────
+// ─── /verify/[hash] — schema v2.0, dual-read for pre-2.0 records ────────
 async function handleVerify(hash, url, env) {
   if (!hash || !HEX64.test(hash)) {
     return json({ error: 'Invalid hash format' }, 400);
   }
 
-  const raw = await env.PROVENANCE.get(`record:${hash}`);
-  if (!raw) {
+  const found = await getRecordDualRead(env, hash);
+  if (!found) {
     return json({
       status: 'not_found',
       hash,
@@ -427,7 +446,11 @@ async function handleVerify(hash, url, env) {
     }, 404);
   }
 
-  const record = JSON.parse(raw);
+  if (found.legacy) {
+    return handleVerifyLegacy(found.record);
+  }
+
+  const record = found.record;
 
   const otsStatus = record.anchor.ots_status || 'pending';
   let otsPendingHours = null;
@@ -459,6 +482,31 @@ async function handleVerify(hash, url, env) {
     registered: true,
     record_hash_valid: recordHashValid,
     session_match: sessionMatch,
+    ots_pending_hours: otsPendingHours,
+    ots_pending_message: otsPendingMessage,
+  });
+}
+
+// Pre-2.0 flat record — same response shape the old worker returned, so
+// the existing verify.haawke.com legacy renderer (already deployed on the
+// provenance-v2 branch, schema_version-gated) keeps working unmodified.
+function handleVerifyLegacy(record) {
+  const otsStatus = record.ots_status || 'pending';
+  let otsPendingHours = null;
+  let otsPendingMessage = null;
+  if (otsStatus === 'pending' && record.registered) {
+    const elapsedMs = Date.now() - new Date(record.registered).getTime();
+    otsPendingHours = Math.round(elapsedMs / 3600000 * 10) / 10;
+    otsPendingMessage = `Submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h). Pending ${otsPendingHours}h.`;
+  }
+
+  return json({
+    status: 'verified',
+    ...record,
+    registered: true,
+    registered_at: record.registered,
+    ots_status: otsStatus,
+    bitcoin_block: record.bitcoin_block || null,
     ots_pending_hours: otsPendingHours,
     ots_pending_message: otsPendingMessage,
   });
