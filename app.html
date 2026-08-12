@@ -470,6 +470,12 @@ background-image: url("/landing-page/images/background.jpg") ;
     .url-row { flex-direction: column; }
     .tabs { flex-wrap: wrap; }
     .tab { flex: 1 1 calc(50% - 2px); font-size: 11px; padding: 10px 6px; }
+    /* Background photo reads as noisy/blurry once scaled+cropped to a
+       narrow portrait viewport -- flat dark background reads cleaner. */
+    body::before { background-image: none; }
+    /* A bit more width for the app column now that there's no side
+       image to frame -- was 20px each side. */
+    html, body { padding-left: 12px; padding-right: 12px; }
   }
 
   /* AUTHOR FIELDS */
