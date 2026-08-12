@@ -740,6 +740,7 @@ background-image: url("./images/background.jpg") ;
       <button class="tab" onclick="switchTab('text')">Text / HTML</button>
       <button class="tab" onclick="switchTab('url')">URL</button>
       <button class="tab" onclick="switchTab('session')">Session</button>
+      <button class="tab" onclick="switchTab('existing')">Register Existing Hash</button>
     </div>
 
     <!-- FILE -->
@@ -826,6 +827,30 @@ background-image: url("./images/background.jpg") ;
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- REGISTER EXISTING HASH -->
+    <div id="tab-existing" style="display:none">
+      <div class="session-field">
+        <label class="session-label" for="existingHashInput">
+          External SHA-256 <span style="color:var(--blue)">*</span>
+        </label>
+        <input type="text" id="existingHashInput" maxlength="64" class="session-prev-hash"
+          placeholder="64-character SHA-256 computed elsewhere (EXIFTool, filesystem, another service)">
+      </div>
+      <div class="drop-zone" id="existingDropZone" style="margin-top:14px">
+        <input type="file" id="existingFileInput" onchange="handleExistingFile(this.files[0])">
+        <div class="drop-label" id="existingDropLabel">
+          <strong>Drop the original file here</strong>
+          Its SHA-256 will be computed locally and compared to the hash above
+        </div>
+      </div>
+      <div style="margin-top:10px; font-size:11px; color:var(--dim); letter-spacing:0.08em;">
+        Registers under Track 1 (human-initiated) with a note that the hash was computed
+        externally and verified against the file by Haawke Hash — not that Haawke generated it.
+      </div>
+      <div id="existingStatus" style="display:none;margin-top:14px;padding:12px 14px;border:1px solid;font-size:12px;letter-spacing:0.06em;"></div>
+      <button class="btn btn-gold btn-full" style="margin-top:14px" onclick="verifyAndRegisterExisting()">Verify &amp; Register</button>
     </div>
 
     <!-- AUTHOR DETAILS -->
@@ -996,7 +1021,7 @@ background-image: url("./images/background.jpg") ;
   let log = JSON.parse(localStorage.getItem('haawke-hash-log') || '[]');
 
   // TAB SWITCHING
-  const TAB_IDS = ['file', 'text', 'url', 'session'];
+  const TAB_IDS = ['file', 'text', 'url', 'session', 'existing'];
   function switchTab(tab) {
     TAB_IDS.forEach(t => {
       document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
@@ -1019,6 +1044,22 @@ background-image: url("./images/background.jpg") ;
     dropZone.querySelector('.drop-label').innerHTML = `<strong>${file.name}</strong>${formatBytes(file.size)} · ${file.type || 'unknown type'}`;
     dropZone.dataset.file = 'loaded';
     dropZone._file = file;
+  }
+
+  const existingDropZone = document.getElementById('existingDropZone');
+  existingDropZone.addEventListener('dragover', e => { e.preventDefault(); existingDropZone.classList.add('dragover'); });
+  existingDropZone.addEventListener('dragleave', () => existingDropZone.classList.remove('dragover'));
+  existingDropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    existingDropZone.classList.remove('dragover');
+    handleExistingFile(e.dataTransfer.files[0]);
+  });
+
+  function handleExistingFile(file) {
+    if (!file) return;
+    document.getElementById('existingDropLabel').innerHTML =
+      `<strong>${file.name}</strong>${formatBytes(file.size)} · ${file.type || 'unknown type'}`;
+    existingDropZone._file = file;
   }
 
   function formatBytes(b) {
@@ -1300,6 +1341,131 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
     document.getElementById('logImportInput').value = '';
   }
 
+  // Client-side thumbnail: canvas-resized, max 256x256, aspect preserved.
+  // Non-image files (or any failure) resolve to null — the worker treats
+  // an absent thumbnail_base64 as "no preview," never a placeholder.
+  function generateThumbnailBase64(file) {
+    return new Promise(resolve => {
+      if (!file.type || !file.type.startsWith('image/')) { resolve(null); return; }
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 256;
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/png');
+        resolve(dataUrl.split(',')[1] || null);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => resolve(null);
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  function showExistingStatus(message, kind) {
+    const el = document.getElementById('existingStatus');
+    el.style.display = 'block';
+    el.style.borderColor = kind === 'error' ? 'rgba(255,80,80,0.4)' : 'rgba(201,168,76,0.4)';
+    el.style.color = kind === 'error' ? 'rgba(255,120,120,0.9)' : 'var(--gold)';
+    el.innerHTML = message;
+  }
+
+  async function verifyAndRegisterExisting() {
+    const pastedHash = document.getElementById('existingHashInput').value.trim().toLowerCase();
+    if (!/^[0-9a-f]{64}$/.test(pastedHash)) {
+      showExistingStatus('Enter a valid 64-character SHA-256 hash.', 'error');
+      return;
+    }
+    const file = existingDropZone._file;
+    if (!file) {
+      showExistingStatus('Please select or drop the original file.', 'error');
+      return;
+    }
+
+    showExistingStatus('Computing SHA-256 of the uploaded file…', 'ok');
+    const buffer = await file.arrayBuffer();
+    const computedHash = await sha256(buffer);
+
+    if (computedHash !== pastedHash) {
+      showExistingStatus(
+        `Hash does not match file. Verify the correct file is uploaded.<br><br>` +
+        `Pasted: <span style="word-break:break-all">${pastedHash}</span><br>` +
+        `Computed: <span style="word-break:break-all">${computedHash}</span>`,
+        'error'
+      );
+      return;
+    }
+
+    showExistingStatus('Hash confirmed — registering…', 'ok');
+
+    const thumbnailBase64 = await generateThumbnailBase64(file);
+    const nowIso = new Date().toISOString();
+    const author = getAuthor() !== 'Unknown Author' ? getAuthor() : 'Craig Ellenwood';
+    const orcid = getOrcid() || '0009-0001-6475-5109';
+    const org = getOrg() || 'Haawke Neural Technology';
+
+    const payload = {
+      content: {
+        output_hash: computedHash,
+        filename: file.name,
+        media_type: file.type || null,
+        provenance_note: `SHA-256 computed externally and verified against file by Haawke Hash v2.1 on ${nowIso}`,
+      },
+      identity: { author, orcid, org, session_type: 'human-initiated' },
+      anthropic: {},
+      environment: { platform: navigator.platform || null },
+    };
+    if (thumbnailBase64) payload.thumbnail_base64 = thumbnailBase64;
+
+    try {
+      const res = await fetch('https://haawke-verify.haawkeai.workers.dev/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (data.status === 'registered' || data.status === 'exists') {
+        const seq = data.record?.chain?.sequence_number;
+        showExistingStatus(
+          (data.status === 'registered'
+            ? `✓ Registered — Track 1${seq ? `, sequence #${seq}` : ''}.`
+            : '✓ Already in registry (first record preserved).') +
+          `<br><a href="https://verify.haawke.com/#${computedHash}" target="_blank" style="color:var(--gold)">verify.haawke.com/#${computedHash.slice(0,16)}…</a>`,
+          'ok'
+        );
+
+        // Bitcoin anchor via OTS, same as the existing hash flow.
+        try {
+          const hashBytes = new Uint8Array(computedHash.match(/.{2}/g).map(b => parseInt(b, 16)));
+          const otsResp = await fetch('https://haawke-verify.haawkeai.workers.dev/ots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/octet-stream' },
+            body: hashBytes,
+          });
+          if (otsResp.ok) {
+            const otsBytes = await otsResp.arrayBuffer();
+            const blob = new Blob([otsBytes], { type: 'application/octet-stream' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${file.name.replace(/[^a-z0-9]/gi, '_')}_${computedHash.slice(0,8)}.ots`;
+            a.click();
+          }
+        } catch (e) {
+          // OTS is best-effort here — registration already succeeded.
+        }
+      } else {
+        showExistingStatus(`Registration failed: ${data.error || 'unknown error'}`, 'error');
+      }
+    } catch (e) {
+      showExistingStatus(`Could not reach the registry: ${e.message}`, 'error');
+    }
+  }
+
   async function saveToLog() {
     if (!currentHash) return;
     log.unshift(currentMeta);
@@ -1317,17 +1483,27 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
       renderChainViewer();
     }
 
-    // Register to Cloudflare KV public registry
+    // Register to Cloudflare KV public registry — schema v2.0 (content/
+    // identity/anthropic/environment). Human-operated tool, always
+    // Track 1-eligible (track itself is derived server-side from ORCID
+    // presence); session_type is explicitly human-initiated regardless,
+    // since a person is driving this UI either way.
     try {
       const payload = {
-        hash: currentMeta.hash,
-        filename: currentMeta.name,
-        author: getAuthor(),
-        orcid: getOrcid(),
-        org: getOrg(),
-        source: 'hash.haawke.com'
+        content: {
+          output_hash: currentMeta.hash,
+          filename: currentMeta.name,
+          media_type: currentFileType || null,
+        },
+        identity: {
+          author: getAuthor(),
+          orcid: getOrcid() || null,
+          org: getOrg() || null,
+          session_type: 'human-initiated',
+        },
+        anthropic: {},
+        environment: { platform: navigator.platform || null },
       };
-      if (currentSessionData) payload.type = 'memory-chain';
       const res = await fetch('https://haawke-verify.haawkeai.workers.dev/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
