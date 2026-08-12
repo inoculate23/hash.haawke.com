@@ -6,3 +6,11 @@ workers_dev = true
 kv_namespaces = [
   { binding = "PROVENANCE", id = "61c3afcf84844c3cbe7969ea88b9fbb3" }
 ]
+
+[[durable_objects.bindings]]
+name = "SEQUENCER"
+class_name = "SequenceCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SequenceCounter"]
