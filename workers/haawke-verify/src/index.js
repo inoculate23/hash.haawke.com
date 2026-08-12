@@ -169,6 +169,105 @@ async function verifyCertificateSignature(certificateHashHex, signatureB64) {
   );
 }
 
+// ─── did:key derivation (multicodec ed25519-pub + base58btc) ───────────
+const B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function base58Encode(bytes) {
+  let digits = [0];
+  for (const byte of bytes) {
+    let carry = byte;
+    for (let i = 0; i < digits.length; i++) {
+      carry += digits[i] << 8;
+      digits[i] = carry % 58;
+      carry = (carry / 58) | 0;
+    }
+    while (carry > 0) {
+      digits.push(carry % 58);
+      carry = (carry / 58) | 0;
+    }
+  }
+  let leadingZeros = 0;
+  for (const byte of bytes) {
+    if (byte === 0) leadingZeros++;
+    else break;
+  }
+  return '1'.repeat(leadingZeros) + digits.reverse().map(d => B58_ALPHABET[d]).join('');
+}
+
+// SPKI DER for a raw Ed25519 public key is always 44 bytes: a fixed
+// 12-byte ASN.1 prefix (302a300506032b6570032100) + the 32-byte raw key.
+// The multicodec varint for ed25519-pub is 0xed 0x01.
+function didKeyFromPublicKeyPem(pem) {
+  const der = pemToDer(pem);
+  const rawKey = der.slice(der.length - 32);
+  const prefixed = new Uint8Array(2 + rawKey.length);
+  prefixed[0] = 0xed;
+  prefixed[1] = 0x01;
+  prefixed.set(rawKey, 2);
+  return 'did:key:z' + base58Encode(prefixed);
+}
+
+const HAAWKE_SIGNING_DID_KEY = didKeyFromPublicKeyPem(HAAWKE_PUBLIC_KEY_PEM);
+
+// ─── XMP sidecar projection (v2.1) ──────────────────────────────────────
+// Projected FROM the already-signed JSON record — never authored
+// separately, so JSON and XMP can never disagree. haawke:generatorClaimed
+// / modelClaimed / sessionId are deliberately named "Claimed", never
+// "Verified" — session_id is local-client metadata, not Anthropic-issued.
+function xmlAttrEscape(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function xmpForRecord(record) {
+  const c = record.content, id = record.identity, a = record.anthropic, ch = record.chain, v = record.verification;
+  const certificateId = 'urn:uuid:' + crypto.randomUUID();
+  const attrs = {
+    'haawke:schemaVersion': '2.1',
+    'haawke:contentHashAlgorithm': 'SHA-256',
+    'haawke:contentHash': c.output_hash,
+    'haawke:mediaType': c.media_type || '',
+    'haawke:generatorClaimed': a.tool_surface || id.author,
+    'haawke:modelClaimed': a.model || '',
+    'haawke:sessionId': a.session_id || '',
+    'haawke:captureTrust': 'locally-observed',
+    'haawke:author': id.author,
+    'haawke:orcid': id.orcid || '',
+    'haawke:org': id.org,
+    'haawke:sessionType': id.session_type,
+    'haawke:track': String(id.track),
+    'haawke:sequenceNumber': String(ch.sequence_number),
+    'haawke:previousSealHash': ch.previous_seal_hash || '',
+    'haawke:certificateID': certificateId,
+    'haawke:certificateHash': v.certificate_hash,
+    'haawke:createdAt': record.timestamp.registered_at,
+    'haawke:signatureAlgorithm': 'Ed25519',
+    'haawke:signingKey': HAAWKE_SIGNING_DID_KEY,
+    'haawke:signature': v.signature,
+    'haawke:otsReceipt': `${c.filename}.xmp.ots`,
+    'haawke:verifyURL': `https://verify.haawke.com/verify/${c.output_hash}`,
+    'haawke:registry': 'https://verify.haawke.com',
+  };
+  const attrString = Object.entries(attrs)
+    .map(([k, val]) => `      ${k}="${xmlAttrEscape(val)}"`)
+    .join('\n');
+
+  return `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:haawke="https://haawke.com/ns/provenance/1.0/">
+    <rdf:Description rdf:about="${xmlAttrEscape(c.filename)}"
+${attrString}/>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>
+`;
+}
+
 // ─── Dual-read KV compat ─────────────────────────────────────────────────
 // The pre-2.0 worker stored records under the raw hash as the KV key
 // ({hash} -> record). Schema v2.0 stores under `record:{hash}` instead.
@@ -316,6 +415,10 @@ export default {
       const model = decodeURIComponent(path.replace('/model/', '').trim());
       return handleModel(model, env);
     }
+    if (path.startsWith('/xmp/') && request.method === 'GET') {
+      const xmpHash = path.replace('/xmp/', '').trim();
+      return handleXmp(xmpHash, env);
+    }
     if (path === '/ots/confirm' && request.method === 'POST') {
       return handleOtsConfirm(request, env);
     }
@@ -400,13 +503,20 @@ async function handleOTS(request) {
 async function handleRegister(request, env) {
   try {
     const body = await request.json();
-    const { content, identity, anthropic, environment, timestamp } = body;
+    const { content, identity, anthropic, environment, timestamp, thumbnail_base64 } = body;
 
     if (!content || !content.output_hash || !HEX64.test(content.output_hash)) {
       return json({ error: 'content.output_hash is required — must be 64 character SHA-256' }, 400);
     }
     if (content.input_hash && !HEX64.test(content.input_hash)) {
       return json({ error: 'content.input_hash must be a 64 character SHA-256 if present' }, 400);
+    }
+    // Thumbnail is generated client-side (Pillow in the daemon, canvas in
+    // the browser) — the worker does no image processing, just storage.
+    // 2MB base64 is a generous ceiling for a <=256x256 preview; this is
+    // abuse protection, not a real expected size.
+    if (thumbnail_base64 && thumbnail_base64.length > 2 * 1024 * 1024) {
+      return json({ error: 'thumbnail_base64 too large (max ~2MB base64)' }, 400);
     }
 
     const outputHash = content.output_hash;
@@ -444,6 +554,8 @@ async function handleRegister(request, env) {
         input_hash: content.input_hash || null,
         token_count: Number.isFinite(content.token_count) ? content.token_count : null,
         filename: content.filename || 'unknown',
+        media_type: content.media_type || null,
+        provenance_note: content.provenance_note || null,
       },
       identity: {
         author: identity.author,
@@ -508,6 +620,23 @@ async function handleRegister(request, env) {
     if (sessionId) {
       await env.PROVENANCE.put(`session:${sessionId}`, outputHash);
     }
+    // Thumbnail: stored separately, never part of the signed record — it's
+    // derived from already-hashed content, generated client-side, and
+    // must never feed back into output_hash or certificate_hash (that
+    // would be a circular dependency: hash the file -> derive a thumbnail
+    // from the file -> hash-that-includes-the-thumbnail).
+    if (thumbnail_base64) {
+      await env.PROVENANCE.put(`thumb:${outputHash}`, thumbnail_base64);
+    }
+    // XMP sidecar — images only. Built from the already-signed record, so
+    // it can never disagree with the JSON certificate (see xmpForRecord).
+    let xmp = null;
+    let xmpHash = null;
+    if ((record.content.media_type || '').startsWith('image/')) {
+      xmp = xmpForRecord(record);
+      xmpHash = await sha256HexOfString(xmp);
+      await env.PROVENANCE.put(`xmp:${outputHash}`, xmp);
+    }
     if (model) {
       // Best-effort display counter, not a security claim — read-then-write
       // on KV can under-count by a handful under heavy concurrency. Unlike
@@ -537,6 +666,8 @@ async function handleRegister(request, env) {
       status: 'registered',
       message: 'Provenance record created.',
       record,
+      xmp_url: xmp ? `${new URL(request.url).origin}/xmp/${outputHash}` : null,
+      xmp_hash: xmpHash,
     }, 201);
   } catch (e) {
     return json({ error: e.message }, 500);
@@ -596,6 +727,14 @@ async function handleVerify(hash, url, env) {
     sessionMatch = sessionParam === record.anthropic.session_id;
   }
 
+  // Thumbnail/XMP are stored separately from the signed record (see
+  // handleRegister) — surfaced here for display convenience, not part of
+  // anything that was hashed or signed.
+  const thumbnailBase64 = await env.PROVENANCE.get(`thumb:${hash}`);
+  const hasXmp = (record.content.media_type || '').startsWith('image/')
+    ? Boolean(await env.PROVENANCE.get(`xmp:${hash}`))
+    : false;
+
   return json({
     status: 'verified',
     ...record,
@@ -606,6 +745,8 @@ async function handleVerify(hash, url, env) {
     session_match: sessionMatch,
     ots_pending_hours: otsPendingHours,
     ots_pending_message: otsPendingMessage,
+    thumbnail_base64: thumbnailBase64 || null,
+    xmp_url: hasXmp ? `${url.origin}/xmp/${hash}` : null,
   });
 }
 
@@ -703,6 +844,20 @@ async function handleModel(model, env) {
   const records = recents.filter(r => r.model === model);
 
   return json({ status: 'ok', model, count, records });
+}
+
+// GET /xmp/{output_hash} — raw XMP sidecar, servable as {filename}.xmp
+async function handleXmp(hash, env) {
+  if (!hash || !HEX64.test(hash)) {
+    return json({ error: 'Invalid hash format' }, 400);
+  }
+  const xmp = await env.PROVENANCE.get(`xmp:${hash}`);
+  if (!xmp) {
+    return json({ status: 'not_found', hash, message: 'No XMP sidecar for this hash.' }, 404);
+  }
+  return new Response(xmp, {
+    headers: { ...CORS, 'Content-Type': 'application/rdf+xml' },
+  });
 }
 
 // Statuses that /ots/tag may set — never 'confirmed' (that goes through /ots/confirm with a block)
