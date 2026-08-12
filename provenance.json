@@ -1,11 +1,11 @@
 {
-  "hash": "5278d96bb819e170f13528688564eef95fbe72fdf8b4617534f78dd538b65d5b",
+  "hash": "a0c2fac03a4dcc43c6635b67b1c736254308591ea4bf40f195da6557cbbb7384",
   "file": "app.html",
-  "date": "June 17, 2026",
-  "author": "Craig Ellenwood × Claude (Anthropic)",
-  "orcid": "0009-0001-6475-5109",
+  "date": "August 11, 2026",
+  "author": "Claude Code (Independent)",
+  "orcid": null,
   "org": "Haawke Neural Technology",
-  "tool": "Haawke Hash v1.3",
+  "tool": "Haawke Hash v2.1",
   "blockchain": "Bitcoin via OpenTimestamps",
-  "verify": "https://verify.haawke.com/#5278d96bb819e170f13528688564eef95fbe72fdf8b4617534f78dd538b65d5b"
+  "verify": "https://verify.haawke.com/#a0c2fac03a4dcc43c6635b67b1c736254308591ea4bf40f195da6557cbbb7384"
 }
