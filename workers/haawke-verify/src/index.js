@@ -1,21 +1,26 @@
-// Haawke Hash — Provenance Registry — SCHEMA v2.0 (staging)
+// Haawke Hash — Provenance Registry — SCHEMA v2.1 (staging)
 // Cloudflare Worker · haawke-verify-staging
-// Implements: Haawke Provenance Record Implementation Spec v2.0 (2026-08-11),
-// corrected per the four issues flagged before build (see commit message /
-// PR description): session_id is local-client/unverified (not Anthropic-
-// issued), model/token_count sourced from transcript JSONL (not API
-// headers), model_card_url uses a family mapping (not raw substitution),
-// and the chain (sequence_number + previous_seal_hash) is made genuinely
-// atomic via a Durable Object rather than best-effort KV increments.
+// Implements: Haawke Provenance Record Implementation Spec v2.0 (2026-08-11)
+// + v2.1 Feature 1 (Durable Object atomic chain — was already built into
+// v2.0 here) + worker-side Ed25519 signing (2026-08-11 follow-up).
+// v2.0 corrected per four issues flagged before build: session_id is
+// local-client/unverified (not Anthropic-issued), model/token_count
+// sourced from transcript JSONL (not API headers), model_card_url uses a
+// family mapping (not raw substitution), chain made genuinely atomic via
+// a Durable Object rather than best-effort KV increments.
 //
-// record_hash design note: it seals {content, identity, anthropic, chain,
-// environment, timestamp, verification.qr_payload, verification.model_card_url}
-// — it deliberately does NOT cover `anchor`, because anchor.ots_status /
+// certificate_hash design note: it seals {content, identity, anthropic,
+// chain, environment, timestamp, verification.qr_payload,
+// verification.model_card_url, verification.signing_key_url} — it
+// deliberately does NOT cover `anchor`, because anchor.ots_status /
 // anchor.bitcoin_block / anchor.ots_receipt are filled in asynchronously
 // after registration (Bitcoin confirmation can take ~24h). Their own
 // integrity comes from the OTS calendar + Bitcoin blockchain, independent
-// of record_hash. This keeps record_hash valid forever from the moment of
-// sealing, while anchor fields can still be patched post-confirmation.
+// of certificate_hash. This keeps certificate_hash valid forever from the
+// moment of sealing, while anchor fields can still be patched post-
+// confirmation. certificate_hash is computed via JCS (RFC 8785) canonical
+// JSON, then signed with Ed25519 — the private key is a Cloudflare Worker
+// secret (HAAWKE_SIGNING_KEY), never in source, KV, or any response.
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -78,6 +83,92 @@ async function sha256HexOfString(str) {
 
 const HEX64 = /^[0-9a-f]{64}$/;
 
+// ─── JCS (RFC 8785) canonicalization ────────────────────────────────────
+// Sorted object keys (by UTF-16 code unit — JS default string sort),
+// arrays in original order, no inserted whitespace. This is a faithful
+// JCS implementation for our data model (strings/integers/null/nested
+// objects/arrays) — we never carry the exotic floats RFC 8785's number
+// algorithm exists for, and JS's default Number-to-String already follows
+// the same ECMAScript algorithm the RFC references.
+function jcsCanonicalize(value) {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return '[' + value.map(jcsCanonicalize).join(',') + ']';
+  }
+  const keys = Object.keys(value).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + jcsCanonicalize(value[k])).join(',') + '}';
+}
+
+// ─── Ed25519 signing (worker-side; private key lives only as an
+// encrypted Cloudflare Worker secret, HAAWKE_SIGNING_KEY — never in
+// source, never in KV, never returned in any response) ─────────────────
+const HAAWKE_PUBLIC_KEY_PEM = `-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAfOogrhY0DfsYiLZLDkT95g3SuS3aWOcmpZgsObjWxMY=
+-----END PUBLIC KEY-----`;
+const HAAWKE_SIGNING_KEY_URL = 'https://haawke.com/ns/provenance/1.0/signing-key';
+
+function pemToDer(pem) {
+  const b64 = pem
+    .replace(/-----BEGIN [^-]+-----/, '')
+    .replace(/-----END [^-]+-----/, '')
+    .replace(/\s+/g, '');
+  const raw = atob(b64);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+  return bytes;
+}
+
+async function importSigningKey(env) {
+  const der = pemToDer(env.HAAWKE_SIGNING_KEY);
+  return crypto.subtle.importKey('pkcs8', der, { name: 'Ed25519' }, false, ['sign']);
+}
+
+async function importVerifyKey() {
+  const der = pemToDer(HAAWKE_PUBLIC_KEY_PEM);
+  return crypto.subtle.importKey('spki', der, { name: 'Ed25519' }, false, ['verify']);
+}
+
+function bytesToBase64(bytes) {
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+  return bytes;
+}
+
+// Signs the certificate_hash bytes (not the canonical JSON string itself)
+// — standard "sign the digest" pattern. Plain Ed25519 (not Ed25519ph)
+// hashes its input internally regardless, so signing a 32-byte SHA-256
+// digest here is a normal, secure use of the primitive.
+async function signCertificateHash(env, certificateHashHex) {
+  const key = await importSigningKey(env);
+  const sigBuf = await crypto.subtle.sign({ name: 'Ed25519' }, key, hexToBytes(certificateHashHex));
+  return bytesToBase64(new Uint8Array(sigBuf));
+}
+
+async function verifyCertificateSignature(certificateHashHex, signatureB64) {
+  const key = await importVerifyKey();
+  return crypto.subtle.verify(
+    { name: 'Ed25519' },
+    key,
+    base64ToBytes(signatureB64),
+    hexToBytes(certificateHashHex)
+  );
+}
+
 // ─── Dual-read KV compat ─────────────────────────────────────────────────
 // The pre-2.0 worker stored records under the raw hash as the KV key
 // ({hash} -> record). Schema v2.0 stores under `record:{hash}` instead.
@@ -96,18 +187,23 @@ async function getRecordDualRead(env, hash) {
 }
 
 export class SequenceCounter {
-  constructor(state) {
+  constructor(state, env) {
     this.state = state;
+    this.env = env;
   }
 
-  // POST /commit — the single serialization point for the whole chain.
-  // Body: the fully-assembled record minus chain.sequence_number,
-  // chain.previous_seal_hash, and verification.record_hash.
-  // Returns: { sequence_number, previous_seal_hash, record_hash, record }
+  // POST /commit — the single serialization point for the whole chain
+  // AND for signing. Body: the fully-assembled unsigned certificate minus
+  // chain.sequence_number, chain.previous_seal_hash, and
+  // verification.certificate_hash/signature.
+  // Returns: { sequence_number, previous_seal_hash, certificate_hash,
+  //            signature, record }
   // All of this runs inside one DO request — Workers Durable Objects
-  // process one request at a time per instance, so this is genuinely
-  // atomic. No other caller can observe or interleave with a half-updated
-  // sequence/head state.
+  // process one request at a time per instance, so sequencing is
+  // genuinely atomic. No other caller can observe or interleave with a
+  // half-updated sequence/head state. Signing happens in the same request
+  // so "the worker signs, the worker registers" is one atomic operation,
+  // not two round trips that could disagree.
   async fetch(request) {
     const url = new URL(request.url);
 
@@ -151,23 +247,37 @@ export class SequenceCounter {
     const sessionIdForQr = (partial.anthropic && partial.anthropic.session_id) || '';
     const qrPayload = `https://verify.haawke.com/verify/${partial.content.output_hash}?session=${sessionIdForQr}&seq=${sequenceNumber}`;
 
-    partial.verification = { ...partial.verification, qr_payload: qrPayload, record_hash: '' };
+    partial.verification = {
+      ...partial.verification,
+      qr_payload: qrPayload,
+      certificate_hash: '',
+      signature: '',
+      signing_key_url: HAAWKE_SIGNING_KEY_URL,
+    };
 
-    // record_hash excludes `anchor` — see file header note.
+    // certificate_hash excludes `anchor` (async-mutable — see file header
+    // note on record_hash's original design, same reasoning applies) and
+    // is computed over JCS-canonicalized JSON (RFC 8785), not plain
+    // JSON.stringify, so any independent verifier reconstructing this
+    // hash gets a spec-defined, unambiguous canonical form rather than
+    // one that happens to match this file's key insertion order.
     const { anchor, ...toHash } = partial;
-    const canonical = JSON.stringify(toHash);
-    const recordHash = await sha256HexOfString(canonical);
+    const canonical = jcsCanonicalize(toHash);
+    const certificateHash = await sha256HexOfString(canonical);
+    const signature = await signCertificateHash(this.env, certificateHash);
 
-    partial.verification.record_hash = recordHash;
+    partial.verification.certificate_hash = certificateHash;
+    partial.verification.signature = signature;
     partial.anchor = anchor;
 
     await this.state.storage.put('seq', sequenceNumber);
-    await this.state.storage.put('head_hash', recordHash);
+    await this.state.storage.put('head_hash', certificateHash);
 
     return json({
       sequence_number: sequenceNumber,
       previous_seal_hash: previousSealHash,
-      record_hash: recordHash,
+      certificate_hash: certificateHash,
+      signature,
       record: partial,
     });
   }
@@ -325,7 +435,7 @@ async function handleRegister(request, env) {
     const sessionId = (anthropic && anthropic.session_id) || null;
     const model = (anthropic && anthropic.model) || null;
 
-    // Partial record — chain + verification.record_hash filled in by the
+    // Partial record — chain + verification.certificate_hash/signature filled in by the
     // Durable Object, which is the single atomic serialization point.
     const partial = {
       schema_version: '2.0',
@@ -369,7 +479,9 @@ async function handleRegister(request, env) {
         registry: 'https://verify.haawke.com',
       },
       verification: {
-        record_hash: null,
+        certificate_hash: null,
+        signature: null,
+        signing_key_url: null,
         qr_payload: null,
         model_card_url: modelCardUrl(model),
       },
@@ -385,11 +497,12 @@ async function handleRegister(request, env) {
     if (!commitResp.ok) {
       return json({ error: 'Sequencer commit failed' }, 502);
     }
-    const { sequence_number, previous_seal_hash, record_hash, record } = await commitResp.json();
+    const { sequence_number, record } = await commitResp.json();
 
     // Persist. The DO already made {sequence_number, previous_seal_hash,
-    // record_hash} correct and race-free — these KV writes are just
-    // secondary indexes for lookup, not the source of chain truth.
+    // certificate_hash, signature} correct and race-free — these KV
+    // writes are just secondary indexes for lookup, not the source of
+    // chain truth.
     await env.PROVENANCE.put(`record:${outputHash}`, JSON.stringify(record));
     await env.PROVENANCE.put(`seq:${sequence_number}`, outputHash);
     if (sessionId) {
@@ -461,14 +574,21 @@ async function handleVerify(hash, url, env) {
     otsPendingMessage = `Submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h). Pending ${otsPendingHours}h.`;
   }
 
-  // Recompute record_hash the same way the DO did, so the API can tell
-  // the caller directly whether the record is self-consistent (spec
-  // verification step 2), without them having to reimplement the
-  // canonicalization rule.
+  // Recompute certificate_hash the same way the DO did (JCS canonical
+  // form), so the API can tell the caller directly whether the record is
+  // self-consistent — AND independently verify the Ed25519 signature
+  // against the published public key. Both must pass for certificate_valid.
   const { anchor, ...toHash } = record;
-  const hashCheckObj = { ...toHash, verification: { ...toHash.verification, record_hash: '' } };
-  const recomputed = await sha256HexOfString(JSON.stringify(hashCheckObj));
-  const recordHashValid = recomputed === record.verification.record_hash;
+  const hashCheckObj = {
+    ...toHash,
+    verification: { ...toHash.verification, certificate_hash: '', signature: '' },
+  };
+  const recomputedHash = await sha256HexOfString(jcsCanonicalize(hashCheckObj));
+  const hashValid = recomputedHash === record.verification.certificate_hash;
+  const signatureValid = hashValid && record.verification.signature
+    ? await verifyCertificateSignature(record.verification.certificate_hash, record.verification.signature)
+    : false;
+  const certificateValid = hashValid && signatureValid;
 
   let sessionMatch = null;
   const sessionParam = url.searchParams.get('session');
@@ -480,7 +600,9 @@ async function handleVerify(hash, url, env) {
     status: 'verified',
     ...record,
     registered: true,
-    record_hash_valid: recordHashValid,
+    certificate_hash_valid: hashValid,
+    certificate_signature_valid: signatureValid,
+    certificate_valid: certificateValid,
     session_match: sessionMatch,
     ots_pending_hours: otsPendingHours,
     ots_pending_message: otsPendingMessage,
