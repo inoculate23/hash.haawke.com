@@ -31,6 +31,7 @@
     flex-direction: column;
     align-items: center;
     padding: 60px 20px 80px;
+    overflow-x: hidden;
   }
 
   /* Background image */
@@ -173,6 +174,7 @@ background-image: url("/landing-page/images/background.jpg") ;
 
   .tab {
     flex: 1;
+    min-width: 0;
     padding: 10px;
     background: transparent;
     border: 1px solid var(--border);
@@ -466,6 +468,8 @@ background-image: url("/landing-page/images/background.jpg") ;
   @media (max-width: 600px) {
     .formats { grid-template-columns: 1fr; }
     .url-row { flex-direction: column; }
+    .tabs { flex-wrap: wrap; }
+    .tab { flex: 1 1 calc(50% - 2px); font-size: 11px; padding: 10px 6px; }
   }
 
   /* AUTHOR FIELDS */
