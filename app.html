@@ -1483,17 +1483,27 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
       renderChainViewer();
     }
 
-    // Register to Cloudflare KV public registry
+    // Register to Cloudflare KV public registry — schema v2.0 (content/
+    // identity/anthropic/environment). Human-operated tool, always
+    // Track 1-eligible (track itself is derived server-side from ORCID
+    // presence); session_type is explicitly human-initiated regardless,
+    // since a person is driving this UI either way.
     try {
       const payload = {
-        hash: currentMeta.hash,
-        filename: currentMeta.name,
-        author: getAuthor(),
-        orcid: getOrcid(),
-        org: getOrg(),
-        source: 'hash.haawke.com'
+        content: {
+          output_hash: currentMeta.hash,
+          filename: currentMeta.name,
+          media_type: currentFileType || null,
+        },
+        identity: {
+          author: getAuthor(),
+          orcid: getOrcid() || null,
+          org: getOrg() || null,
+          session_type: 'human-initiated',
+        },
+        anthropic: {},
+        environment: { platform: navigator.platform || null },
       };
-      if (currentSessionData) payload.type = 'memory-chain';
       const res = await fetch('https://haawke-verify.haawkeai.workers.dev/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
