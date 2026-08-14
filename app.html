@@ -2309,7 +2309,7 @@ It cannot have been altered after the registered date.`;
     const orcidRow  = orcid  ? `<div class="row"><div class="lbl">ORCID iD</div><div class="val mono">${escapeXml(orcid)}</div></div>` : '';
     const sizeRow   = meta.size ? `<div class="row"><div class="lbl">File Size</div><div class="val mono">${meta.size}</div></div>` : '';
     const thumbHtml = currentThumbnailDataUrl
-      ? `<div class="thumb-wrap"><img class="thumb" src="${currentThumbnailDataUrl}" alt="Preview of ${escapeXml(meta.name || 'the registered file')}"></div>`
+      ? `<img class="thumb" src="${currentThumbnailDataUrl}" alt="Preview of ${escapeXml(meta.name || 'the registered file')}">`
       : '';
 
     const html = `<!DOCTYPE html>
@@ -2327,8 +2327,8 @@ It cannot have been altered after the registered date.`;
   h1 em{font-style:italic;color:#6b4f1a}
   .sub{font-size:7.5pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(42,31,14,.5);text-align:center;margin-bottom:4mm}
   hr{border:none;border-top:.4px solid rgba(139,105,20,.5);margin:0 8mm 4mm}
-  .thumb-wrap{display:flex;justify-content:center;margin-bottom:3mm}
-  .thumb{max-width:34mm;max-height:34mm;border:1px solid rgba(139,105,20,.4);padding:1mm;background:rgba(255,252,245,.85)}
+  .media-row{display:flex;justify-content:center;align-items:flex-start;gap:6mm;margin-top:1mm}
+  .thumb{max-width:28mm;max-height:28mm;border:1px solid rgba(139,105,20,.4);padding:1mm;background:rgba(255,252,245,.85)}
   .body{display:flex;flex-direction:column;align-items:center;gap:2.5mm}
   .fields{width:100%;max-width:130mm}
   .row{margin-bottom:2.2mm}
@@ -2353,7 +2353,6 @@ It cannot have been altered after the registered date.`;
   <h1>Provenance <em>Certificate</em></h1>
   <div class="sub">Cryptographic Record of Authorship</div>
   <hr>
-  ${thumbHtml}
   <div class="body">
     <div class="fields">
       ${authorRow}${orgRow}${orcidRow}
@@ -2367,8 +2366,11 @@ It cannot have been altered after the registered date.`;
       </div>
       <div class="row" style="margin-top:2mm"><div class="lbl">Verify at</div><div class="val verify-url"><a href="${escapeXml(verifyUrl)}" target="_blank" rel="noopener">${escapeXml(verifyUrl)}</a></div></div>
     </div>
-    <div class="qr-col">
-      <div class="qr-box" id="certQr"></div>
+    <div class="media-row">
+      ${thumbHtml}
+      <div class="qr-col">
+        <div class="qr-box" id="certQr"></div>
+      </div>
     </div>
   </div>
   <div class="footer">
