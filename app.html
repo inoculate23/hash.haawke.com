@@ -2313,26 +2313,27 @@ It cannot have been altered after the registered date.`;
   @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Space+Mono:wght@400;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:210mm;height:297mm;background:#f5f0e8}
-  .page{width:210mm;height:297mm;padding:38mm 30mm 32mm 30mm;display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;color:#2a1f0e;position:relative;${tpl.pageCss}}
+  .page{width:210mm;height:297mm;padding:62mm 30mm 50mm 30mm;display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;color:#2a1f0e;position:relative;${tpl.pageCss}}
   .eyebrow{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:#8b6914;text-align:center;margin-bottom:4mm}
   h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:24pt;text-align:center;color:#2a1f0e;margin-bottom:1.5mm;letter-spacing:.02em}
   h1 em{font-style:italic;color:#6b4f1a}
   .sub{font-size:7.5pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(42,31,14,.5);text-align:center;margin-bottom:4mm}
   hr{border:none;border-top:.4px solid rgba(139,105,20,.5);margin:0 8mm 4mm}
-  .body{display:flex;gap:6mm;flex:1}
-  .fields{flex:1}
-  .row{margin-bottom:3mm}
+  .body{display:flex;flex-direction:column;align-items:center;gap:2.5mm;flex:1}
+  .fields{width:100%;max-width:130mm}
+  .row{margin-bottom:2.2mm}
+  .row .lbl,.row .val{text-align:center}
   .lbl{font-size:6.5pt;letter-spacing:.22em;text-transform:uppercase;color:#8b6914;margin-bottom:.8mm}
   .val{font-size:10pt;color:#2a1f0e;line-height:1.4}
   .val.mono{font-family:'Space Mono',monospace;font-size:8.5pt}
   .hash-abbr{font-family:'Space Mono',monospace;font-size:9.5pt;color:#2a1f0e}
-  .hash-full{font-family:'Space Mono',monospace;font-size:6.5pt;color:rgba(42,31,14,.45);word-break:break-all;margin-top:1.5mm;line-height:1.5}
+  .hash-full{font-family:'Space Mono',monospace;font-size:6.5pt;color:rgba(42,31,14,.45);word-break:break-all;margin-top:1.5mm;line-height:1.5;text-align:center}
   .verify-url{font-family:'Space Mono',monospace;font-size:7pt;color:#4a6b8a}
-  .qr-col{width:36mm;display:flex;flex-direction:column;align-items:center;gap:2.5mm;padding-top:1mm;transform:translateX(-8.4mm)}
-  .qr-box{width:34mm;height:34mm;border:1px solid rgba(139,105,20,.4);padding:1.5mm;background:rgba(255,252,245,.85);display:flex;align-items:center;justify-content:center}
+  .qr-col{width:30mm;display:flex;flex-direction:column;align-items:center;gap:1.5mm;margin:0 auto}
+  .qr-box{width:28mm;height:28mm;border:1px solid rgba(139,105,20,.4);padding:1.5mm;background:rgba(255,252,245,.85);display:flex;align-items:center;justify-content:center}
   .qr-box img,.qr-box canvas{width:100%!important;height:100%!important}
   .qr-lbl{font-size:6pt;letter-spacing:.12em;text-transform:uppercase;color:rgba(42,31,14,.4);text-align:center}
-  .footer{border-top:.4px solid rgba(139,105,20,.3);padding-top:3mm;margin-top:2mm;font-size:6pt;color:rgba(42,31,14,.4);letter-spacing:.08em;text-align:center;line-height:1.9}
+  .footer{width:100%;max-width:130mm;border-top:.4px solid rgba(139,105,20,.3);padding-top:3mm;font-size:6pt;color:rgba(42,31,14,.4);letter-spacing:.08em;text-align:center;line-height:1.9}
   @media print{html,body{width:210mm;height:297mm}@page{margin:0;size:A4}.page{page-break-after:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
@@ -2356,15 +2357,14 @@ It cannot have been altered after the registered date.`;
       </div>
       <div class="row" style="margin-top:2mm"><div class="lbl">Verify at</div><div class="val verify-url"><a href="${escapeXml(verifyUrl)}" target="_blank" rel="noopener">${escapeXml(verifyUrl)}</a></div></div>
     </div>
+    <div class="footer">
+      This certificate records the cryptographic hash of the above work at time of registration.<br>
+      Registered to Bitcoin blockchain via OpenTimestamps &nbsp;&middot;&nbsp; U.S. Copyright Registration 1-15179233921<br>
+      Verify authenticity at verify.haawke.com &nbsp;&middot;&nbsp; Haawke Hash &mdash; Provenance Tool &nbsp;&middot;&nbsp; ${year}
+    </div>
     <div class="qr-col">
       <div class="qr-box" id="certQr"></div>
-      <div class="qr-lbl">Scan to verify</div>
     </div>
-  </div>
-  <div class="footer">
-    This certificate records the cryptographic hash of the above work at time of registration.<br>
-    Registered to Bitcoin blockchain via OpenTimestamps &nbsp;&middot;&nbsp; U.S. Copyright Registration 1-15179233921<br>
-    Verify authenticity at verify.haawke.com &nbsp;&middot;&nbsp; Haawke Hash &mdash; Provenance Tool &nbsp;&middot;&nbsp; ${year}
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\x2Fscript>
