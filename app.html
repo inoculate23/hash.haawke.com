@@ -2201,10 +2201,10 @@ It cannot have been altered after the registered date.`;
 
   // CERTIFICATE TEMPLATES
   const CERT_TEMPLATES = [
-    { id: 1, name: 'Circuit', tier: 'free',
-      swatch: "background:#fff;background-image:linear-gradient(rgba(42,31,14,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(42,31,14,.2) 1px,transparent 1px);background-size:7px 7px",
-      pageCss: "background:#ffffff;background-image:linear-gradient(rgba(42,31,14,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(42,31,14,.05) 1px,transparent 1px);background-size:6mm 6mm",
-      deco: '<div style="position:absolute;inset:9mm;border:.5px solid rgba(42,31,14,.45);pointer-events:none"></div><div style="position:absolute;inset:10.4mm;border:.3px solid rgba(42,31,14,.22);pointer-events:none"></div>' },
+    { id: 1, name: 'Hawke Seal', tier: 'free',
+      swatch: "background:#e6d2a4 url('./images/hash-template-hawke.webp') center/cover",
+      pageCss: "background:#e6d2a4 url('https://hash.haawke.com/images/hash-template-hawke.webp') center/cover no-repeat",
+      deco: '' },
     { id: 2, name: 'Bitcoin', tier: 'pro',
       swatch: "background:#f4f5f7 url('./images/hash-template-2.webp') center/cover",
       pageCss: "background:#f4f5f7 url('https://hash.haawke.com/images/hash-template-2.webp') center/cover no-repeat",
@@ -2217,10 +2217,10 @@ It cannot have been altered after the registered date.`;
       swatch: "background:#f5f0e8 url('./images/hash-template-3.webp') center/cover",
       pageCss: "background:#f5f0e8 url('https://hash.haawke.com/images/hash-template-3.webp') center/100% 100% no-repeat",
       deco: '' },
-    { id: 5, name: 'Parchment', tier: 'pro',
-      swatch: "background:radial-gradient(ellipse at center,#f6ecd2 0%,#e6d2a4 70%,#d4ba82 100%);border-color:#8b6914",
-      pageCss: "background:radial-gradient(ellipse at center,#f6ecd2 0%,#ecd9ae 65%,#dcc28c 100%)",
-      deco: '<div style="position:absolute;inset:7mm;border:1.2mm double #8b6914;pointer-events:none"></div><div style="position:absolute;inset:10.5mm;border:.4mm solid rgba(139,105,20,.55);pointer-events:none"></div><div style="position:absolute;inset:11.8mm;border:.2mm solid rgba(139,105,20,.35);pointer-events:none"></div><div style="position:absolute;top:12mm;left:13mm;font-size:14pt;color:#8b6914">❦</div><div style="position:absolute;top:12mm;right:13mm;font-size:14pt;color:#8b6914;transform:scaleX(-1)">❦</div><div style="position:absolute;bottom:12mm;left:13mm;font-size:14pt;color:#8b6914;transform:scaleY(-1)">❦</div><div style="position:absolute;bottom:12mm;right:13mm;font-size:14pt;color:#8b6914;transform:scale(-1)">❦</div>' }
+    { id: 5, name: 'Circuit', tier: 'free',
+      swatch: "background:#fff;background-image:linear-gradient(rgba(42,31,14,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(42,31,14,.2) 1px,transparent 1px);background-size:7px 7px",
+      pageCss: "background:#ffffff;background-image:linear-gradient(rgba(42,31,14,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(42,31,14,.05) 1px,transparent 1px);background-size:6mm 6mm",
+      deco: '<div style="position:absolute;inset:9mm;border:.5px solid rgba(42,31,14,.45);pointer-events:none"></div><div style="position:absolute;inset:10.4mm;border:.3px solid rgba(42,31,14,.22);pointer-events:none"></div>' }
   ];
 
   function getSelectedTemplate() {
