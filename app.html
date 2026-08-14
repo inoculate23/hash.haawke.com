@@ -1027,6 +1027,7 @@ background-image: url("/landing-page/images/background.jpg") ;
   let currentHash = null;
   let currentFileType = null;
   let currentMeta = {};
+  let currentThumbnailDataUrl = null;
   let currentSessionData = null;
   let log = JSON.parse(localStorage.getItem('haawke-hash-log') || '[]');
 
@@ -1115,6 +1116,8 @@ background-image: url("/landing-page/images/background.jpg") ;
 
     let buffer, name, size, fileType;
 
+    currentThumbnailDataUrl = null;
+
     if (activeTab === 'file') {
       const file = dropZone._file;
       if (!file) { alert('Please select or drop a file first.'); return; }
@@ -1122,6 +1125,8 @@ background-image: url("/landing-page/images/background.jpg") ;
       name = file.name;
       size = formatBytes(file.size);
       fileType = file.type;
+      const thumbB64 = await generateThumbnailBase64(file);
+      if (thumbB64) currentThumbnailDataUrl = `data:image/png;base64,${thumbB64}`;
     } else if (activeTab === 'text / html') {
       const text = document.getElementById('textInput').value;
       if (!text.trim()) { alert('Please enter some text to hash.'); return; }
@@ -2303,6 +2308,9 @@ It cannot have been altered after the registered date.`;
     const orgRow    = org    ? `<div class="row"><div class="lbl">Organization</div><div class="val">${escapeXml(org)}</div></div>` : '';
     const orcidRow  = orcid  ? `<div class="row"><div class="lbl">ORCID iD</div><div class="val mono">${escapeXml(orcid)}</div></div>` : '';
     const sizeRow   = meta.size ? `<div class="row"><div class="lbl">File Size</div><div class="val mono">${meta.size}</div></div>` : '';
+    const thumbHtml = currentThumbnailDataUrl
+      ? `<div class="thumb-wrap"><img class="thumb" src="${currentThumbnailDataUrl}" alt="Preview of ${escapeXml(meta.name || 'the registered file')}"></div>`
+      : '';
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -2313,13 +2321,15 @@ It cannot have been altered after the registered date.`;
   @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Space+Mono:wght@400;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:210mm;height:297mm;background:#f5f0e8}
-  .page{width:210mm;height:297mm;padding:62mm 30mm 50mm 30mm;display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;color:#2a1f0e;position:relative;${tpl.pageCss}}
+  .page{width:210mm;height:297mm;padding:62mm 30mm 9mm 30mm;display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;color:#2a1f0e;position:relative;${tpl.pageCss}}
   .eyebrow{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:#8b6914;text-align:center;margin-bottom:4mm}
   h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:24pt;text-align:center;color:#2a1f0e;margin-bottom:1.5mm;letter-spacing:.02em}
   h1 em{font-style:italic;color:#6b4f1a}
   .sub{font-size:7.5pt;letter-spacing:.2em;text-transform:uppercase;color:rgba(42,31,14,.5);text-align:center;margin-bottom:4mm}
   hr{border:none;border-top:.4px solid rgba(139,105,20,.5);margin:0 8mm 4mm}
-  .body{display:flex;flex-direction:column;align-items:center;gap:2.5mm;flex:1}
+  .thumb-wrap{display:flex;justify-content:center;margin-bottom:3mm}
+  .thumb{max-width:34mm;max-height:34mm;border:1px solid rgba(139,105,20,.4);padding:1mm;background:rgba(255,252,245,.85)}
+  .body{display:flex;flex-direction:column;align-items:center;gap:2.5mm}
   .fields{width:100%;max-width:130mm}
   .row{margin-bottom:2.2mm}
   .row .lbl,.row .val{text-align:center}
@@ -2332,8 +2342,7 @@ It cannot have been altered after the registered date.`;
   .qr-col{width:30mm;display:flex;flex-direction:column;align-items:center;gap:1.5mm;margin:0 auto}
   .qr-box{width:28mm;height:28mm;border:1px solid rgba(139,105,20,.4);padding:1.5mm;background:rgba(255,252,245,.85);display:flex;align-items:center;justify-content:center}
   .qr-box img,.qr-box canvas{width:100%!important;height:100%!important}
-  .qr-lbl{font-size:6pt;letter-spacing:.12em;text-transform:uppercase;color:rgba(42,31,14,.4);text-align:center}
-  .footer{width:100%;max-width:130mm;border-top:.4px solid rgba(139,105,20,.3);padding-top:3mm;font-size:6pt;color:rgba(42,31,14,.4);letter-spacing:.08em;text-align:center;line-height:1.9}
+  .footer{width:100%;max-width:130mm;margin:auto auto 0;border-top:.4px solid rgba(139,105,20,.3);padding-top:3mm;font-size:6pt;color:rgba(42,31,14,.4);letter-spacing:.08em;text-align:center;line-height:1.9}
   @media print{html,body{width:210mm;height:297mm}@page{margin:0;size:A4}.page{page-break-after:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
@@ -2344,6 +2353,7 @@ It cannot have been altered after the registered date.`;
   <h1>Provenance <em>Certificate</em></h1>
   <div class="sub">Cryptographic Record of Authorship</div>
   <hr>
+  ${thumbHtml}
   <div class="body">
     <div class="fields">
       ${authorRow}${orgRow}${orcidRow}
@@ -2357,14 +2367,14 @@ It cannot have been altered after the registered date.`;
       </div>
       <div class="row" style="margin-top:2mm"><div class="lbl">Verify at</div><div class="val verify-url"><a href="${escapeXml(verifyUrl)}" target="_blank" rel="noopener">${escapeXml(verifyUrl)}</a></div></div>
     </div>
-    <div class="footer">
-      This certificate records the cryptographic hash of the above work at time of registration.<br>
-      Registered to Bitcoin blockchain via OpenTimestamps &nbsp;&middot;&nbsp; U.S. Copyright Registration 1-15179233921<br>
-      Verify authenticity at verify.haawke.com &nbsp;&middot;&nbsp; Haawke Hash &mdash; Provenance Tool &nbsp;&middot;&nbsp; ${year}
-    </div>
     <div class="qr-col">
       <div class="qr-box" id="certQr"></div>
     </div>
+  </div>
+  <div class="footer">
+    This certificate records the cryptographic hash of the above work at time of registration.<br>
+    Registered to Bitcoin blockchain via OpenTimestamps &nbsp;&middot;&nbsp; U.S. Copyright Registration 1-15179233921<br>
+    Verify authenticity at verify.haawke.com &nbsp;&middot;&nbsp; Haawke Hash &mdash; Provenance Tool &nbsp;&middot;&nbsp; ${year}
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\x2Fscript>
