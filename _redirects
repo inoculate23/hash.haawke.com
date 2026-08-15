@@ -1,2 +1,20 @@
 /hash  /app  200
 /tos   /tos.html  200
+
+# hash.haawke.com's DNS (NS1) points straight at Netlify with no Cloudflare
+# involvement -- these forward the Worker's real API routes to its raw
+# workers.dev URL, same pattern verify.haawke.com already uses for /verify/:hash.
+# 308, not 301: most of these are POST, and 301/302 are spec-defined to
+# downgrade POST to GET on redirect (Cloudflare Workers' fetch() follows this
+# spec) -- 308 preserves method and body.
+/ots            https://haawke-verify.haawkeai.workers.dev/ots             308
+/api/hash       https://haawke-verify.haawkeai.workers.dev/api/hash        308
+/register       https://haawke-verify.haawkeai.workers.dev/register        308
+/ots/confirm    https://haawke-verify.haawkeai.workers.dev/ots/confirm     308
+/ots/tag        https://haawke-verify.haawkeai.workers.dev/ots/tag         308
+/verify/*       https://haawke-verify.haawkeai.workers.dev/verify/:splat   308
+/recent         https://haawke-verify.haawkeai.workers.dev/recent         308
+/chain          https://haawke-verify.haawkeai.workers.dev/chain          308
+/session/*      https://haawke-verify.haawkeai.workers.dev/session/:splat  308
+/model/*        https://haawke-verify.haawkeai.workers.dev/model/:splat    308
+/xmp/*          https://haawke-verify.haawkeai.workers.dev/xmp/:splat      308

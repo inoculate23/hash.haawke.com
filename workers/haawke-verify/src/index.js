@@ -394,6 +394,9 @@ export default {
     if (path === '/ots' && request.method === 'POST') {
       return handleOTS(request);
     }
+    if (path === '/api/hash' && request.method === 'POST') {
+      return handleApiHash(request, env);
+    }
     if (path === '/register' && request.method === 'POST') {
       return handleRegister(request, env);
     }
@@ -497,6 +500,89 @@ async function handleOTS(request) {
   } catch (e) {
     return json({ error: e.message }, 500);
   }
+}
+
+// ─── /api/hash — adapter for haawke-llm ─────────────────────────────────
+// Bridges haawke-llm's simple {content, anchor} request/response shape to
+// the real v2.0 /register schema, which requires a pre-computed hash and
+// richer identity/anthropic/environment fields. This worker computes the
+// hash itself (register never does) and translates the nested v2.0 record
+// back down to the flat shape haawke-llm's Worker already expects.
+async function handleApiHash(request, env) {
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ error: 'invalid JSON' }, 400); }
+
+  const { content } = body;
+  if (!content || typeof content !== 'string') {
+    return json({ error: 'content required' }, 400);
+  }
+
+  const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
+  const hashHex = Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const registerPayload = {
+    content: {
+      output_hash: hashHex,
+      input_hash: null,
+      token_count: null,
+      filename: null,
+      media_type: 'text/plain',
+      provenance_note: 'AI-generated response via Haawke LLM API',
+    },
+    identity: {
+      author: 'Haawke LLM API',
+      orcid: null,
+      org: 'Haawke Neural Technology',
+      session_type: 'api',
+    },
+    anthropic: { session_id: null, model: 'google/gemma-4-12b-it', api_endpoint: 'haawke-llm-api', tool_surface: null },
+    chain: { parent_session_id: null },
+    environment: { platform: 'RunPod Serverless', tool_version: null, sealing_machine: null },
+    timestamp: { local_log_at: new Date().toISOString() },
+    thumbnail_base64: null,
+  };
+
+  // Real origin, not a placeholder -- handleRegister derives xmp_url from
+  // request.url's origin. Inert today (media_type is always text/plain
+  // here, so XMP generation never triggers), but a synthetic/fake origin
+  // would silently produce a broken xmp_url the moment this path is ever
+  // extended to image content.
+  const syntheticReq = new Request('https://hash.haawke.com/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(registerPayload),
+  });
+
+  const regResp = await handleRegister(syntheticReq, env);
+
+  if (!regResp.ok) {
+    // Registration failed -- return the local hash only, flagged as such.
+    return json({
+      hash: `sha256:${hashHex}`,
+      url: `https://verify.haawke.com/verify/${hashHex}`,
+      timestamp: new Date().toISOString(),
+      anchored: false,
+      pending: false,
+    });
+  }
+
+  const regBody = await regResp.json();
+  const record = regBody.record ?? regBody;
+  // Real anchor fields are {ots_status, bitcoin_block, ots_receipt,
+  // registry} -- NOT bitcoin_txid/ots_digest, which don't exist on this
+  // schema. ots_status is 'pending' immediately after registration; it
+  // only becomes 'confirmed' once the OTS poller sees a Bitcoin block.
+  return json({
+    hash: `sha256:${hashHex}`,
+    url: `https://verify.haawke.com/verify/${hashHex}`,
+    timestamp: record.timestamp?.registered_at ?? new Date().toISOString(),
+    anchored: record.anchor?.ots_status === 'confirmed',
+    pending: record.anchor?.ots_status === 'pending',
+    sequence_number: record.chain?.sequence_number ?? null,
+    certificate_hash: record.verification?.certificate_hash ?? null,
+  });
 }
 
 // ─── /register — schema v2.0 ────────────────────────────────────────────
