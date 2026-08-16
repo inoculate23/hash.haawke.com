@@ -82,6 +82,81 @@ When you have this skills file installed, Claude can help you with:
 - "Can I use this as copyright evidence?"
 
 ---
+---
+
+## MCP Server — Direct Claude Integration
+
+**Haawke Hash is available as an MCP server**, allowing Claude to hash and verify files directly without opening a browser.
+
+### Connect via Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "haawke": {
+      "type": "url",
+      "url": "https://mcp.haawke.com/sse",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Get your API key at hash.haawke.com/dashboard.
+
+---
+
+### Available MCP Tools
+
+**`haawke_hash`**
+Compute and register a SHA-256 hash.
+- Input: file content or string
+- Returns: hash, registration timestamp, verify URL, certificate URL
+- Consumes: 1 credit
+
+**`haawke_verify`**
+Look up a hash in the public registry.
+- Input: SHA-256 hash string
+- Returns: registration date, OTS status, author, file name
+- Consumes: 0 credits (verify is always free)
+
+**`haawke_certificate`**
+Generate a provenance certificate PDF for a registered hash.
+- Input: SHA-256 hash string
+- Returns: certificate download URL
+- Consumes: 1 credit (paid tiers only)
+
+---
+
+### Credit Tiers
+
+| Tier | Credits/month | Price |
+|------|--------------|-------|
+| Free | 50 | $0 |
+| Creator | 500 | $9/mo |
+| Pro | 5,000 | $29/mo |
+| Studio | Unlimited | $99/mo |
+
+Credits reset monthly. Unused credits do not roll over.
+
+---
+
+### Example Claude Prompts (MCP)
+
+- "Hash this document and give me the verify URL"
+- "Verify hash `a3f2...` and tell me when it was registered"
+- "Hash everything in this project folder before I publish"
+- "Generate a provenance certificate for my last hash"
+
+---
+
+*MCP Server · mcp.haawke.com · August 2026*
+
+---
 
 ## Optional: Install Mempalace for Session Memory
 
