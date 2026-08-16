@@ -513,9 +513,20 @@ async function handleApiHash(request, env) {
   try { body = await request.json(); }
   catch { return json({ error: 'invalid JSON' }, 400); }
 
-  const { content } = body;
+  const { content, input_hash, model } = body;
   if (!content || typeof content !== 'string') {
     return json({ error: 'content required' }, 400);
+  }
+
+  // Caller may pass a pre-computed client-side input hash (e.g. haawke-chat
+  // hashes the human prompt before sending) -- optional, "sha256:" prefix
+  // stripped if present since handleRegister expects raw 64-char hex.
+  let inputHashHex = null;
+  if (input_hash) {
+    inputHashHex = String(input_hash).replace(/^sha256:/, '');
+    if (!HEX64.test(inputHashHex)) {
+      return json({ error: 'input_hash must be a 64 character SHA-256 hex string' }, 400);
+    }
   }
 
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
@@ -525,7 +536,7 @@ async function handleApiHash(request, env) {
   const registerPayload = {
     content: {
       output_hash: hashHex,
-      input_hash: null,
+      input_hash: inputHashHex,
       token_count: null,
       filename: null,
       media_type: 'text/plain',
@@ -537,7 +548,7 @@ async function handleApiHash(request, env) {
       org: 'Haawke Neural Technology',
       session_type: 'api',
     },
-    anthropic: { session_id: null, model: 'google/gemma-4-12b-it', api_endpoint: 'haawke-llm-api', tool_surface: null },
+    anthropic: { session_id: null, model: model || null, api_endpoint: 'haawke-llm-api', tool_surface: null },
     chain: { parent_session_id: null },
     environment: { platform: 'RunPod Serverless', tool_version: null, sealing_machine: null },
     timestamp: { local_log_at: new Date().toISOString() },
