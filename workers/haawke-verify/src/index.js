@@ -34,6 +34,146 @@ function json(body, status = 200) {
   return new Response(JSON.stringify(body, null, 2), { status, headers: JSON_HEADERS });
 }
 
+// Browsers navigating to a verify link send Accept: text/html,...; API
+// callers (including haawke-llm's own handleVerify(), which explicitly
+// sends Accept: application/json) don't. ?format=json is the escape hatch
+// for viewing raw JSON from a browser instead of the rendered page.
+function renderAsHtml(request, url) {
+  if (url.searchParams.get('format') === 'json') return false;
+  const accept = request.headers.get('Accept') || '';
+  return accept.includes('text/html');
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[c]);
+}
+
+function shortHash(h) {
+  if (!h || h.length < 16) return esc(h);
+  return `${h.slice(0, 10)}…${h.slice(-8)}`;
+}
+
+function statusBadge(status) {
+  const map = {
+    verified: { label: 'VERIFIED', color: '#00f0ff', bg: 'rgba(0,240,255,0.08)', border: 'rgba(0,240,255,0.3)' },
+    not_found: { label: 'NOT FOUND', color: '#fca5a5', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.3)' },
+  };
+  const s = map[status] || { label: (status || 'unknown').toUpperCase(), color: '#a1a1aa', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)' };
+  return `<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:${s.bg};border:1px solid ${s.border};color:${s.color};font-size:0.78rem;font-weight:700;letter-spacing:0.05em;">${s.label}</span>`;
+}
+
+function checkRow(label, ok) {
+  const color = ok ? '#4ade80' : '#fca5a5';
+  const icon = ok ? '&#10003;' : '&#10007;';
+  return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span style="color:#a1a1aa;font-size:0.88rem;">${esc(label)}</span><span style="color:${color};font-weight:700;">${icon}</span></div>`;
+}
+
+function fieldRow(label, value, mono) {
+  if (value === undefined || value === null || value === '') return '';
+  const style = mono ? 'font-family:\'JetBrains Mono\',monospace;font-size:0.82rem;word-break:break-all;' : '';
+  return `<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><div style="color:#71717a;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">${esc(label)}</div><div style="color:#e4e4e7;font-size:0.9rem;${style}">${esc(value)}</div></div>`;
+}
+
+function renderVerifyPage(body, status) {
+  const rawJsonUrl = (() => {
+    // Best-effort: caller supplies status/body only, so build the toggle
+    // link relative to the current path rather than requiring a full URL.
+    return '?format=json';
+  })();
+
+  const outputHash = body.content?.output_hash || body.hash || body.output_hash;
+  const inputHash = body.content?.input_hash;
+  const model = body.anthropic?.model;
+  const registeredAt = body.timestamp?.registered_at || body.registered_at;
+  const seq = body.chain?.sequence_number;
+  const otsStatus = body.anchor?.ots_status ?? body.ots_status;
+  const bitcoinBlock = body.anchor?.bitcoin_block ?? body.bitcoin_block;
+  const org = body.identity?.org;
+  const author = body.identity?.author;
+
+  let anchorHtml = '';
+  if (body.status === 'verified') {
+    const confirmed = otsStatus === 'confirmed';
+    anchorHtml = `
+      <div style="margin-top:24px;padding:18px 20px;border-radius:10px;background:${confirmed ? 'rgba(74,222,128,0.06)' : 'rgba(255,215,0,0.05)'};border:1px solid ${confirmed ? 'rgba(74,222,128,0.25)' : 'rgba(255,215,0,0.2)'};">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-weight:700;color:${confirmed ? '#4ade80' : '#ffd700'};font-size:0.85rem;">${confirmed ? 'Bitcoin-confirmed' : 'Pending Bitcoin confirmation'}</span>
+          ${bitcoinBlock ? `<span style="color:#71717a;font-size:0.8rem;">block ${esc(bitcoinBlock)}</span>` : ''}
+        </div>
+        <div style="color:#a1a1aa;font-size:0.85rem;">${esc(body.ots_pending_message || (confirmed ? 'This record is permanently anchored to the Bitcoin blockchain.' : ''))}</div>
+      </div>`;
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${body.status === 'verified' ? 'Verified' : 'Not Found'} | Haawke Verify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  body { background:#050A18; color:#d4d4d8; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.6; }
+  .wrap { max-width:640px; margin:0 auto; padding:56px 20px 100px; }
+  a { color:#00f0ff; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .brand { display:flex; align-items:center; gap:8px; margin-bottom:28px; }
+  .brand-dot { width:22px; height:22px; border-radius:50%; background:#00f0ff; display:flex; align-items:center; justify-content:center; font-size:12px; color:#000; font-weight:900; }
+  .brand-name { font-weight:900; letter-spacing:-0.02em; color:#fff; }
+  h1 { font-size:1.6rem; font-weight:900; color:#fff; margin:16px 0 4px; letter-spacing:-0.02em; }
+  .hash { font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:#71717a; word-break:break-all; margin-bottom:20px; }
+  .card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:24px; margin-top:20px; }
+  .card h2 { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; color:#71717a; margin:0 0 4px; }
+  .footer-links { margin-top:32px; display:flex; gap:16px; font-size:0.85rem; }
+  .footer-links a { color:#71717a; }
+  .footer-links a:hover { color:#00f0ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="brand-dot">H</div><div class="brand-name">HAAWKE VERIFY</div></div>
+
+  ${statusBadge(body.status)}
+  <h1>${body.status === 'verified' ? 'Provenance Verified' : 'Record Not Found'}</h1>
+  ${outputHash ? `<div class="hash">${esc(outputHash)}</div>` : ''}
+  ${body.status !== 'verified' ? `<p style="color:#a1a1aa;">${esc(body.message || body.error || 'No provenance record exists for this hash.')}</p>` : ''}
+
+  ${body.status === 'verified' ? `
+  <div class="card">
+    <h2>Details</h2>
+    ${fieldRow('Model', model)}
+    ${fieldRow('Organization', org)}
+    ${fieldRow('Author', author)}
+    ${fieldRow('Registered At', registeredAt)}
+    ${fieldRow('Chain Sequence', seq)}
+    ${inputHash ? fieldRow('Prompt Hash (input)', shortHash(inputHash), true) : ''}
+  </div>
+
+  ${anchorHtml}
+
+  <div class="card">
+    <h2>Certificate Integrity</h2>
+    ${checkRow('Hash matches record', body.certificate_hash_valid)}
+    ${checkRow('Signature valid', body.certificate_signature_valid)}
+    ${checkRow('Overall certificate valid', body.certificate_valid)}
+  </div>
+  ` : ''}
+
+  <div class="footer-links">
+    <a href="/">&larr; Haawke Verify</a>
+    <a href="${rawJsonUrl}">View raw JSON</a>
+  </div>
+</div>
+</body>
+</html>`;
+
+  return new Response(html, {
+    status,
+    headers: { ...CORS, 'Content-Type': 'text/html;charset=utf-8' },
+  });
+}
+
 // OpenTimestamps file magic header
 const OTS_MAGIC = new Uint8Array([
   0x00, 0x4f, 0x70, 0x65, 0x6e, 0x54, 0x69, 0x6d,
@@ -402,7 +542,7 @@ export default {
     }
     if (path.startsWith('/verify/') && request.method === 'GET') {
       const hash = path.replace('/verify/', '').trim();
-      return handleVerify(hash, url, env);
+      return handleVerify(hash, url, request, env);
     }
     if (path === '/recent' && request.method === 'GET') {
       return handleRecent(url, env);
@@ -550,7 +690,7 @@ async function handleApiHash(request, env) {
     },
     anthropic: { session_id: null, model: model || null, api_endpoint: 'haawke-llm-api', tool_surface: null },
     chain: { parent_session_id: null },
-    environment: { platform: 'RunPod Serverless', tool_version: null, sealing_machine: null },
+    environment: { platform: 'Baseten', tool_version: null, sealing_machine: null },
     timestamp: { local_log_at: new Date().toISOString() },
     thumbnail_base64: null,
   };
@@ -772,23 +912,27 @@ async function handleRegister(request, env) {
 }
 
 // ─── /verify/[hash] — schema v2.0, dual-read for pre-2.0 records ────────
-async function handleVerify(hash, url, env) {
+async function handleVerify(hash, url, request, env) {
+  const wantsHtml = renderAsHtml(request, url);
+
   if (!hash || !HEX64.test(hash)) {
-    return json({ error: 'Invalid hash format' }, 400);
+    const body = { error: 'Invalid hash format' };
+    return wantsHtml ? renderVerifyPage(body, 400) : json(body, 400);
   }
 
   const found = await getRecordDualRead(env, hash);
   if (!found) {
-    return json({
+    const body = {
       status: 'not_found',
       hash,
       registered: false,
       message: 'No provenance record found for this hash.',
-    }, 404);
+    };
+    return wantsHtml ? renderVerifyPage(body, 404) : json(body, 404);
   }
 
   if (found.legacy) {
-    return handleVerifyLegacy(found.record);
+    return handleVerifyLegacy(found.record, wantsHtml);
   }
 
   const record = found.record;
@@ -832,7 +976,7 @@ async function handleVerify(hash, url, env) {
     ? Boolean(await env.PROVENANCE.get(`xmp:${hash}`))
     : false;
 
-  return json({
+  const body = {
     status: 'verified',
     ...record,
     registered: true,
@@ -844,13 +988,12 @@ async function handleVerify(hash, url, env) {
     ots_pending_message: otsPendingMessage,
     thumbnail_base64: thumbnailBase64 || null,
     xmp_url: hasXmp ? `${url.origin}/xmp/${hash}` : null,
-  });
+  };
+  return wantsHtml ? renderVerifyPage(body, 200) : json(body);
 }
 
-// Pre-2.0 flat record — same response shape the old worker returned, so
-// the existing verify.haawke.com legacy renderer (already deployed on the
-// provenance-v2 branch, schema_version-gated) keeps working unmodified.
-function handleVerifyLegacy(record) {
+// Pre-2.0 flat record — same response shape the old worker returned.
+function handleVerifyLegacy(record, wantsHtml) {
   const otsStatus = record.ots_status || 'pending';
   let otsPendingHours = null;
   let otsPendingMessage = null;
@@ -860,7 +1003,7 @@ function handleVerifyLegacy(record) {
     otsPendingMessage = `Submitted to Bitcoin calendars, awaiting block confirmation (typically within 24h). Pending ${otsPendingHours}h.`;
   }
 
-  return json({
+  const body = {
     status: 'verified',
     ...record,
     registered: true,
@@ -869,7 +1012,8 @@ function handleVerifyLegacy(record) {
     bitcoin_block: record.bitcoin_block || null,
     ots_pending_hours: otsPendingHours,
     ots_pending_message: otsPendingMessage,
-  });
+  };
+  return wantsHtml ? renderVerifyPage(body, 200) : json(body);
 }
 
 async function handleRecent(url, env) {
