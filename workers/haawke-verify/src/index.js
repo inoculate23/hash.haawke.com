@@ -537,6 +537,9 @@ export default {
     if (path === '/api/hash' && request.method === 'POST') {
       return handleApiHash(request, env);
     }
+    if (path.startsWith('/mcp/')) {
+      return handleMcp(request, env, path);
+    }
     if (path === '/register' && request.method === 'POST') {
       return handleRegister(request, env);
     }
@@ -640,6 +643,193 @@ async function handleOTS(request) {
   } catch (e) {
     return json({ error: e.message }, 500);
   }
+}
+
+// ─── /mcp/[slug] — remote MCP server, one client per slug ──────────────
+// Streamable HTTP transport (MCP spec 2025-06-18): a single POST endpoint,
+// JSON-RPC 2.0 in, a single JSON-RPC response out (no SSE stream needed —
+// every tool call here completes in one round trip, so the spec's
+// "server MAY return a plain JSON response instead of opening an SSE
+// stream" branch is what we use throughout). No auth: MCP_CLIENTS below is
+// the allowlist, and identity is bound to the slug server-side so a client
+// can't spoof another client's attribution by passing a different name.
+const MCP_CLIENTS = {
+  isabella: { author: 'Isabella Brynich', org: 'Continuous You — Beta' },
+};
+
+const MCP_TOOLS = [
+  {
+    name: 'haawke_seal',
+    description: 'Seal a piece of text (a Claude response, a session transcript, a document) by hashing it with SHA-256 and registering it to the public Haawke Verify provenance registry. The registry entry is later anchored to the Bitcoin blockchain via OpenTimestamps (confirmation typically completes within ~24h). Returns the hash and a public verify URL.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        content: { type: 'string', description: 'The exact text to seal, verbatim. The hash is computed over this content byte-for-byte.' },
+        title: { type: 'string', description: 'Optional title/filename shown on the certificate, e.g. "2026-08-18 session summary".' },
+      },
+      required: ['content'],
+    },
+  },
+  {
+    name: 'haawke_verify',
+    description: 'Look up a SHA-256 hash in the public Haawke Verify registry and report whether it is registered, when, and its Bitcoin confirmation status.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hash: { type: 'string', description: '64-character SHA-256 hex hash to look up.' },
+      },
+      required: ['hash'],
+    },
+  },
+];
+
+function jsonRpc(id, payload) {
+  const body = 'result' in payload
+    ? { jsonrpc: '2.0', id, result: payload.result }
+    : { jsonrpc: '2.0', id, error: payload.error };
+  return new Response(JSON.stringify(body), { status: 200, headers: JSON_HEADERS });
+}
+
+async function mcpSeal(args, client, env) {
+  if (!args.content || typeof args.content !== 'string') {
+    return { content: [{ type: 'text', text: 'content is required' }], isError: true };
+  }
+
+  const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(args.content));
+  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const registerPayload = {
+    content: {
+      output_hash: hashHex,
+      filename: args.title || null,
+      media_type: 'text/plain',
+      provenance_note: 'Sealed via Claude (MCP) — Haawke Digital Legacy Showcase',
+    },
+    identity: {
+      author: client.author,
+      org: client.org,
+      session_type: 'human-initiated',
+    },
+    anthropic: { api_endpoint: 'mcp', tool_surface: 'haawke_seal' },
+    environment: { platform: 'Claude (MCP)' },
+    timestamp: { local_log_at: new Date().toISOString() },
+  };
+
+  const syntheticReq = new Request('https://hash.haawke.com/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(registerPayload),
+  });
+  const regResp = await handleRegister(syntheticReq, env);
+  const regBody = await regResp.json();
+
+  if (!regResp.ok) {
+    return { content: [{ type: 'text', text: `Failed to seal: ${regBody.error || 'unknown error'}` }], isError: true };
+  }
+
+  const verifyUrl = `https://verify.haawke.com/verify/${hashHex}`;
+  const statusLine = regBody.status === 'exists'
+    ? 'Already sealed previously — first registration preserved (hashing is idempotent, so re-sealing identical content is safe and just returns the original record).'
+    : `Newly sealed — chain sequence #${regBody.record?.chain?.sequence_number ?? '?'}.`;
+
+  return {
+    content: [{
+      type: 'text',
+      text: [
+        `Sealed for ${client.author}.`,
+        statusLine,
+        `SHA-256: ${hashHex}`,
+        `Verify: ${verifyUrl}`,
+        'Bitcoin anchor: pending — OpenTimestamps confirmation typically completes within ~24h; the verify page updates automatically once confirmed.',
+        '',
+        'Full registry record is in structuredContent — use it to log this seal (e.g. title, author, filepath, hash) or to build an HTML/PDF certificate.',
+      ].join('\n'),
+    }],
+    structuredContent: {
+      status: regBody.status === 'exists' ? 'exists' : 'registered',
+      hash: hashHex,
+      verify_url: verifyUrl,
+      record: regBody.record,
+    },
+  };
+}
+
+async function mcpVerify(args, env) {
+  const hash = String(args.hash || '').replace(/^sha256:/, '').trim();
+  if (!HEX64.test(hash)) {
+    return { content: [{ type: 'text', text: 'hash must be a 64-character SHA-256 hex string' }], isError: true };
+  }
+  const found = await getRecordDualRead(env, hash);
+  if (!found) {
+    return {
+      content: [{ type: 'text', text: `Not registered: ${hash}` }],
+      structuredContent: { status: 'not_found', hash },
+    };
+  }
+  const record = found.record;
+  const registeredAt = record.timestamp?.registered_at || record.registered_at || 'unknown';
+  const otsStatus = record.anchor?.ots_status ?? record.ots_status ?? 'pending';
+  return {
+    content: [{
+      type: 'text',
+      text: [
+        `Registered: ${registeredAt}`,
+        `Author: ${record.identity?.author || record.author || 'unknown'}`,
+        `Bitcoin anchor: ${otsStatus}`,
+        `Verify: https://verify.haawke.com/verify/${hash}`,
+        '',
+        'Full registry record is in structuredContent.',
+      ].join('\n'),
+    }],
+    structuredContent: { status: 'verified', hash, legacy: found.legacy, record },
+  };
+}
+
+async function callMcpTool(name, args, client, env) {
+  if (name === 'haawke_seal') return mcpSeal(args, client, env);
+  if (name === 'haawke_verify') return mcpVerify(args, env);
+  return { content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true };
+}
+
+async function handleMcp(request, env, path) {
+  const slug = path.replace('/mcp/', '').trim();
+  const client = MCP_CLIENTS[slug];
+  if (!client) {
+    return json({ error: 'Unknown MCP client' }, 404);
+  }
+  if (request.method !== 'POST') {
+    return json({ error: 'This endpoint requires POST (MCP Streamable HTTP transport)' }, 405);
+  }
+
+  let rpc;
+  try { rpc = await request.json(); }
+  catch { return jsonRpc(null, { error: { code: -32700, message: 'Parse error' } }); }
+
+  const { id, method, params } = rpc;
+
+  if (typeof method === 'string' && method.startsWith('notifications/')) {
+    return new Response(null, { status: 202 });
+  }
+  if (method === 'initialize') {
+    return jsonRpc(id, { result: {
+      protocolVersion: '2025-06-18',
+      capabilities: { tools: {} },
+      serverInfo: { name: 'haawke-verify', version: '1.0.0' },
+    } });
+  }
+  if (method === 'ping') {
+    return jsonRpc(id, { result: {} });
+  }
+  if (method === 'tools/list') {
+    return jsonRpc(id, { result: { tools: MCP_TOOLS } });
+  }
+  if (method === 'tools/call') {
+    const { name, arguments: args } = params || {};
+    const result = await callMcpTool(name, args || {}, client, env);
+    return jsonRpc(id, { result });
+  }
+
+  return jsonRpc(id, { error: { code: -32601, message: `Method not found: ${method}` } });
 }
 
 // ─── /api/hash — adapter for haawke-llm ─────────────────────────────────
