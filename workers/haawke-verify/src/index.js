@@ -83,15 +83,20 @@ function renderVerifyPage(body, status) {
     return '?format=json';
   })();
 
-  const outputHash = body.content?.output_hash || body.hash || body.output_hash;
-  const inputHash = body.content?.input_hash;
-  const model = body.anthropic?.model;
-  const registeredAt = body.timestamp?.registered_at || body.registered_at;
+  // Supports both the whitelisted v2.0 shape (flat: sha256, org, author,
+  // ots_status, ...) and the legacy pre-2.0 spread (nested content/
+  // anthropic/identity/anchor). chain sequence is deliberately not in the
+  // v2.0 whitelist (see handleVerify) — internal/operational, not meant to
+  // be public — so it just won't render here for v2.0 records.
+  const outputHash = body.sha256 || body.content?.output_hash || body.hash || body.output_hash;
+  const inputHash = body.input_hash || body.content?.input_hash;
+  const model = body.model || body.anthropic?.model;
+  const registeredAt = body.registered_at || body.timestamp?.registered_at;
   const seq = body.chain?.sequence_number;
-  const otsStatus = body.anchor?.ots_status ?? body.ots_status;
-  const bitcoinBlock = body.anchor?.bitcoin_block ?? body.bitcoin_block;
-  const org = body.identity?.org;
-  const author = body.identity?.author;
+  const otsStatus = body.ots_status ?? body.anchor?.ots_status;
+  const bitcoinBlock = body.bitcoin_block ?? body.anchor?.bitcoin_block;
+  const org = body.org || body.identity?.org;
+  const author = body.author || body.identity?.author;
 
   let anchorHtml = '';
   if (body.status === 'verified') {
@@ -1166,10 +1171,33 @@ async function handleVerify(hash, url, request, env) {
     ? Boolean(await env.PROVENANCE.get(`xmp:${hash}`))
     : false;
 
+  // Whitelisted, not spread: `record` also carries operational metadata
+  // (session_type, api_endpoint, tool_surface, platform, local_log_at,
+  // chain.sequence_number) that has no reason to be public. Add a field
+  // here only if it's meant to be world-readable. Note: the worker stores
+  // and returns whatever it's given — prompt encryption, where it exists,
+  // happens upstream (HF Space), not here. A record submitted directly to
+  // /register bypassing that path is stored and returned in plaintext.
   const body = {
     status: 'verified',
-    ...record,
     registered: true,
+    sha256: hash,
+    registered_at: record.timestamp?.registered_at,
+    author: record.identity?.author,
+    orcid: record.identity?.orcid,
+    org: record.identity?.org,
+    filename: record.content?.filename,
+    media_type: record.content?.media_type,
+    provenance_note: record.content?.provenance_note,
+    input_hash: record.content?.input_hash,
+    model: record.anthropic?.model,
+    ots_status: record.anchor?.ots_status,
+    bitcoin_block: record.anchor?.bitcoin_block,
+    verify_url: `${url.origin}/verify/${hash}`,
+    qr_payload: record.verification?.qr_payload,
+    certificate_hash: record.verification?.certificate_hash,
+    signature: record.verification?.signature,
+    signing_key_url: record.verification?.signing_key_url,
     certificate_hash_valid: hashValid,
     certificate_signature_valid: signatureValid,
     certificate_valid: certificateValid,
