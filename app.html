@@ -753,6 +753,11 @@ background-image: url("/landing-page/images/background.jpg") ;
       <button class="tab" onclick="switchTab('existing')">Register Existing Hash</button>
     </div>
 
+    <label style="display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:11px;letter-spacing:0.12em;color:var(--dim);cursor:pointer;text-transform:uppercase">
+      <input type="checkbox" id="includeThumbnailChk" style="accent-color:#c9a84c">
+      Include thumbnail preview in certificate &amp; registry (image files only)
+    </label>
+
     <!-- FILE -->
     <div id="tab-file">
       <div class="drop-zone" id="dropZone">
@@ -1125,7 +1130,8 @@ background-image: url("/landing-page/images/background.jpg") ;
       name = file.name;
       size = formatBytes(file.size);
       fileType = file.type;
-      const thumbB64 = await generateThumbnailBase64(file);
+      const thumbB64 = document.getElementById('includeThumbnailChk').checked
+        ? await generateThumbnailBase64(file) : null;
       if (thumbB64) currentThumbnailDataUrl = `data:image/png;base64,${thumbB64}`;
     } else if (activeTab === 'text / html') {
       const text = document.getElementById('textInput').value;
@@ -1417,7 +1423,8 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
 
     showExistingStatus('Hash confirmed — registering…', 'ok');
 
-    const thumbnailBase64 = await generateThumbnailBase64(file);
+    const thumbnailBase64 = document.getElementById('includeThumbnailChk').checked
+      ? await generateThumbnailBase64(file) : null;
     const nowIso = new Date().toISOString();
     const author = getAuthor() !== 'Unknown Author' ? getAuthor() : 'Craig Ellenwood';
     const orcid = getOrcid() || '0009-0001-6475-5109';
@@ -1519,6 +1526,9 @@ JSON.stringify({ sha256: hash, source: name, authored: ts, author, org, orcid, t
         anthropic: {},
         environment: { platform: navigator.platform || null },
       };
+      if (document.getElementById('includeThumbnailChk').checked && currentThumbnailDataUrl) {
+        payload.thumbnail_base64 = currentThumbnailDataUrl.split(',')[1];
+      }
       const res = await fetch('https://haawke-verify.haawkeai.workers.dev/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
