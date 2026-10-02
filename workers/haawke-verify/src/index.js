@@ -1,3 +1,4 @@
+import {validCreator,projectCreator} from './creator.js';
 // Haawke Hash — Provenance Registry — SCHEMA v2.1 (staging)
 // Cloudflare Worker · haawke-verify-staging
 // Implements: Haawke Provenance Record Implementation Spec v2.0 (2026-08-11)
@@ -977,6 +978,8 @@ async function handleRegister(request, env) {
     if (!identity || !identity.author) {
       return json({ error: 'identity.author is required' }, 400);
     }
+    if(identity.creator!==undefined&&!validCreator(identity.creator))return json({error:'Invalid creator identity'},400);
+    if(identity.service!==undefined&&!['Haawke Phoenix image service','Haawke Phoenix chat service'].includes(identity.service))return json({error:'Invalid service attribution'},400);
     const track = identity.orcid ? 1 : 2;
     if (identity.track && identity.track !== track) {
       return json({ error: `identity.track (${identity.track}) inconsistent with orcid presence (expected track ${track})` }, 400);
@@ -1001,6 +1004,8 @@ async function handleRegister(request, env) {
       },
       identity: {
         author: identity.author,
+        ...(identity.creator?{creator:projectCreator(identity.creator)}:{}),
+        ...(identity.service?{service:identity.service}:{}),
         orcid: identity.orcid || null,
         org: identity.org || 'Haawke Neural Technology',
         session_type: identity.session_type || (identity.orcid ? 'human-initiated' : 'autonomous'),
@@ -1188,7 +1193,7 @@ async function handleVerify(hash, url, request, env) {
     status: 'verified',
     schema_version: record.schema_version,
     content: { output_hash: record.content.output_hash, input_hash: record.content.input_hash, filename: record.content.filename, media_type: record.content.media_type, provenance_note: record.content.provenance_note },
-    identity: { author: record.identity.author, org: record.identity.org, orcid: record.identity.orcid, session_type: record.identity.session_type },
+    identity: { author: record.identity.author, org: record.identity.org, orcid: record.identity.orcid, session_type: record.identity.session_type, ...(projectCreator(record.identity.creator)?{creator:projectCreator(record.identity.creator)}:{}), ...(record.identity.service?{service:record.identity.service}:{}) },
     anthropic: { model: record.anthropic.model },
     chain: { sequence_number: record.chain.sequence_number, previous_seal_hash: record.chain.previous_seal_hash },
     timestamp: { registered_at: record.timestamp.registered_at },

@@ -1,3 +1,4 @@
+import {validCreator,projectCreator} from './creator.js';
 /**
  * Additive route adapter for the EXISTING Haawke Verify worker.
  * Not an MCP implementation and not a new registry/hash implementation.
@@ -45,7 +46,9 @@ export async function handleArtifacts(request, env, { hashText, register, verify
 
   const provenance = body.provenance;
   const publicLabel = value => typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9 ./_:+()-]{0,159}$/.test(value);
-  if (provenance !== undefined && (!exactKeys(provenance, ['model', 'provider', 'session_type']) || !publicLabel(provenance.model) || !publicLabel(provenance.provider) || !['human-initiated', 'autonomous'].includes(provenance.session_type))) return reply({ error: { code: 'INVALID_INPUT' } }, 400);
+  if (provenance !== undefined && (!exactKeys(provenance, ['model', 'provider', 'session_type', 'creator']) || !publicLabel(provenance.model) || !publicLabel(provenance.provider) || !['human-initiated', 'autonomous'].includes(provenance.session_type))) return reply({ error: { code: 'INVALID_INPUT' } }, 400);
+
+  if(provenance?.creator!==undefined&&!validCreator(provenance.creator))return reply({error:{code:'INVALID_INPUT'}},400);
 
   // Exact UTF-8 follows the existing mcpSeal()/handleApiHash() policy: no trimming,
   // Unicode normalization, newline replacement, or JSON serialization of the artifact.
@@ -55,7 +58,7 @@ export async function handleArtifacts(request, env, { hashText, register, verify
   // arbitrary metadata and authorization headers cannot reach the registry payload.
   const payload = {
     content: { output_hash: sha256, filename: 'sealed-text.txt', media_type: 'text/plain', provenance_note: 'User-requested text seal through Haawke. Exact UTF-8 artifact; no assertion of authorship or factual correctness.' },
-    identity: { author: 'Haawke artifact service', org: 'Haawke', session_type: provenance?.session_type || 'api' },
+    identity: { author: 'Haawke artifact service', org: 'Haawke', session_type: provenance?.session_type || 'api',...(provenance?{service:'Haawke Phoenix chat service'}:{}),...(provenance?.creator?{creator:projectCreator(provenance.creator)}:{}) },
     ...(provenance ? { anthropic: { model: provenance.model, api_endpoint: provenance.provider, tool_surface: 'Phoenix generation' } } : {}),
     environment: { platform: 'Haawke artifact API' },
   };
