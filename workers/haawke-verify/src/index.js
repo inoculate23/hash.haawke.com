@@ -22,6 +22,8 @@
 // JSON, then signed with Ed25519 — the private key is a Cloudflare Worker
 // secret (HAAWKE_SIGNING_KEY), never in source, KV, or any response.
 
+import { handleArtifacts } from './artifacts.js';
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -535,6 +537,14 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
+
+    if (path === '/v1/artifacts/hash' || path === '/v1/artifacts/seal') {
+      return handleArtifacts(request, env, {
+        hashText: sha256HexOfString,
+        register: handleRegister,
+        verify: handleVerify,
+      });
+    }
 
     if (path === '/ots' && request.method === 'POST') {
       return handleOTS(request);
@@ -1171,15 +1181,19 @@ async function handleVerify(hash, url, request, env) {
     ? Boolean(await env.PROVENANCE.get(`xmp:${hash}`))
     : false;
 
-  // Whitelisted, not spread: `record` also carries operational metadata
-  // (session_type, api_endpoint, tool_surface, platform, local_log_at,
-  // chain.sequence_number) that has no reason to be public. Add a field
-  // here only if it's meant to be world-readable. Note: the worker stores
-  // and returns whatever it's given — prompt encryption, where it exists,
-  // happens upstream (HF Space), not here. A record submitted directly to
-  // /register bypassing that path is stored and returned in plaintext.
+  // Public display projection only. Preserve flat aliases for existing callers.
+  // Never spread the signed record: the added projection excludes session IDs,
+  // endpoints, environment and local logs. Existing flat aliases remain intact.
   const body = {
     status: 'verified',
+    schema_version: record.schema_version,
+    content: { output_hash: record.content.output_hash, input_hash: record.content.input_hash, filename: record.content.filename, media_type: record.content.media_type, provenance_note: record.content.provenance_note },
+    identity: { author: record.identity.author, org: record.identity.org, orcid: record.identity.orcid, session_type: record.identity.session_type },
+    anthropic: { model: record.anthropic.model },
+    chain: { sequence_number: record.chain.sequence_number, previous_seal_hash: record.chain.previous_seal_hash },
+    timestamp: { registered_at: record.timestamp.registered_at },
+    anchor: { ots_status: record.anchor.ots_status, bitcoin_block: record.anchor.bitcoin_block },
+    verification: { model_card_url: record.verification.model_card_url, signing_key_url: record.verification.signing_key_url },
     registered: true,
     sha256: hash,
     registered_at: record.timestamp?.registered_at,
